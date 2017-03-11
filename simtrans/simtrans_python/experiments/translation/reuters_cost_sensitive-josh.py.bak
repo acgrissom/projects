@@ -1,0 +1,111 @@
+import pyximport; pyximport.install()
+import os, sys
+lib_path = os.path.abspath(os.path.join('.'))
+sys.path.append(lib_path)
+from csv import DictWriter
+
+from searn_harness.prediction import LangModNextWord
+from searn_harness.filereaders import UntaggedJapaneseFileReader, PlainUnicodeFileReader
+from searn_harness.translation import JoshuaTranslator
+from searn_harness.prediction import VWOAAVerbPredictor
+from searn_harness.prediction import LangModNextWord, SQLVerbPredictor, ConstantPredictor, LangModVerbPredictor, VWOAAVerbPredictor, LuceneNextWordPredictor
+from searn_harness.filereaders import UntaggedJapaneseFileReader, PlainUnicodeFileReader, CdecParallelCorpusReader
+from searn_harness.feature_extractor import JapaneseSentenceFeatureExtractor
+
+
+if __name__ == "__main__":
+    from lib import flags
+
+    flags.define_string("bigram_file", None, "List of bigrams to consider")
+    flags.define_string("database_verb_lm", None, "Database with verb predictions")
+    flags.define_string("kenlm_verb_lm", None, "KenLM file with verb predictions")
+    flags.define_string("source_full_lm", None, "Full Source Language model  ")
+    flags.define_string("corpus", None, "Corpus for the data")
+    flags.define_string("state_evolution", "results/evolution_test1.csv",
+                        "Where the state evolution results are written")
+
+    flags.define_string("align", None, "Alignment file from GIZA++")
+    flags.define_string("svoc", None, "Source language vocabulary file")
+    flags.define_string("tvoc", None, "Target language vocabulary file")
+    flags.define_string("lexical", None, "Lexical translation prob table")
+    flags.define_string("target_lm", None, "Target language language model")
+
+    flags.define_string("cache_dir", None, "Where we store alignment pickles")
+
+    flags.InitFlags()
+
+    # Load data
+    #corpus = Corpus(flags.corpus)
+
+    # Load next word prediction
+    #nw = LangModNextWord(flags.bigram_file, flags.source_full_lm)
+    nw = LuceneNextWordPredictor(suggester_filename=u"/Users/alvin/OneDrive/research/reuters-j-3gram.suggester",ngram=3)
+    sys.stderr.write("INFO:Loaded suggester.\n")
+
+    
+    jr = UntaggedJapaneseFileReader(u"data/reuters/reuters-cdec.dev")
+    er = PlainUnicodeFileReader(u"data/reuters/reuters-cdec.dev")
+    reader = CdecParallelCorpusReader(u"data/reuters/reuters-cdec.dev", jr, er)
+
+    # Load translation
+    #ot = OmniscientTranslator(flags.svoc, flags.tvoc,
+    #                          flags.lexical, flags.target_lm,
+    #                          flags.corpus)
+    ot = JoshuaTranslator(unicode(os.path.abspath(u"data/reuters/joshua/tune")))
+    
+
+
+    # Load verb prediction
+    #if flags.database_verb_lm:
+    #    vp = SQLVerbPredictor(flags.database_verb_lm)
+    #else:
+    #    vp = LangModVerbPredictor(flags.kenlm_verb_lm, flags.source_full_lm)
+    feature_extractor=JapaneseSentenceFeatureExtractor(ngram=2,
+                                                       use_position=False,
+                                                       count_case_markers=False,
+                                                       normalize_verb=True,
+                                                       case_marker_ngrams=2)
+
+    vp = VWOAAVerbPredictor(unicode(os.path.abspath("corpora/kyoto/kyoto-train.ja-oaa.model")),
+    feature_extractor=feature_extractor)
+
+    # Write CSV explaining what the states are doing
+    fieldnames = ['id', 'preverb', 'verb', 'nextword', 'nextword_trans',
+                  'commit_trans']
+    o = DictWriter(open(flags.state_evolution, 'w'), fieldnames)
+    o.writerow(dict((x, x) for x in fieldnames))
+    #for ii in corpus.get_fold('train'):
+    i = -1
+    for line in reader:
+        #ot.load_single_alignment(flags.cache_dir, ii.id)
+        prediction = (0.0, "")
+        #for pp, vv in ii.observations():
+        pos = 0
+        preverb = reader.left_context_tokens(line)
+        if preverb is None or len(preverb) > 25:
+            continue
+
+        for word in compelte_preverb:
+            pos += 1
+            d = {}
+            d['id'] = ii.id
+            d['preverb'] += [word]
+            d['verb'] = vp.predict(d['preverb'])
+            #(acg) Verb probably should be used in NW prediction
+            prediction = nw.predict(d['preverb']  + d['verb'])
+            d['nextword'] = prediction
+
+            # pred_trans = ot.top(ii.id, pp + [prediction], vv).as_list()
+            # d['nextword_trans'] = pred_trans
+
+            commit = " ".join(ot.top(ii.id, d['preverb'], d['verb']).as_list())
+            d['commit_trans'] = commit
+
+            o.writerow(d)
+
+
+    # Write the optimal policy performance
+
+    # Write baseline performance
+
+    # Write monotone performance

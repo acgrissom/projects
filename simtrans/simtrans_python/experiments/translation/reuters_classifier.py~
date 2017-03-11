@@ -1,0 +1,77 @@
+import logging
+import pickle
+from csv import DictWriter
+from searn_harness.test_optimal_policy import cvnwc_inputs
+from searn_harness.cost_sensitive import Searn, InstanceFactory, ClassifierPolicy
+from searn_harness.prediction import LangModNextWord, SQLVerbPredictor
+from searn_harness.corpus import Corpus
+from searn_harness.omniscient_translator import OmniscientTranslator, Alignment, SequenceTranslation
+from searn_harness.policy import OptimalPolicy, State, VALID_ACTIONS, BatchPolicy, SentenceStateLattice, Policy, InterpolatePolicy
+from searn_harness.parallel_corpus import ParallelInstance
+from searn_harness.feature_preprocessing import FeatureLookup, FilterFeatureLookup
+
+if __name__ == "__main__":
+    from lib import flags
+
+    flags.define_string("bleu_width", 3, "N-gram length to use in bleu scoring")
+    flags.define_string("corpus", None, "Corpus for the data")
+    flags.define_string("bigram_file", None, "List of bigrams to consider")
+    flags.define_string("source_full_lm", None, "Language model for next word prediction")
+    flags.define_string("source_verb_lm", None, "Database with verb predictions")
+    flags.define_string("svoc", None, "Source language vocabulary file")
+    flags.define_string("tvoc", None, "Target language vocabulary file")
+    flags.define_string("lexical", None, "Lexical translation prob table")
+    flags.define_string("target_lm", None, "Target language language model")
+    flags.define_string("cache_dir", None, "Where we store alignment pickles")
+    flags.define_string("output", None, "Where we write the learned classifier")
+    flags.define_int("limit", -1, "Number of training sentences")
+    flags.define_int("rounds", 10, "Number of training iterations")
+
+    flags.InitFlags()
+    logging.basicConfig(filename='classifier_test.log', level=logging.DEBUG)
+
+    # Load next word prediction
+    nw = LangModNextWord(flags.bigram_file, flags.source_full_lm)
+
+    # Load verb prediction
+    vp = SQLVerbPredictor(flags.source_verb_lm)
+
+    # Load translation
+    ot = OmniscientTranslator(flags.svoc, flags.tvoc, flags.lexical, flags.target_lm, flags.corpus)
+
+    corpus = Corpus(flags.corpus)
+
+    num_examples = 0
+    for ii in corpus.get_fold('test0'):
+        num_examples += 1
+        if flags.limit > 0 and num_examples > flags.limit:
+            break
+        else:
+            if num_examples % 10 == 0:
+                print "Adding example %i" % num_examples
+
+        ot.load_single_alignment(flags.cache_dir, ii.id)
+        ref = []
+        for jj in ii.en.split():
+            ref.append(jj)
+        trn = [ParallelInstance(ii.preverb, ii.verb, ref, ii.id)]
+        for example in trn:
+            l = SentenceStateLattice(example.id, example.src_pfx, example.src_vb, example.tgt, [ref], nw_pred=nw, vb_pred=vp, trans=ot)
+            l.build_table()
+            logging.debug("Done building table")
+            #train = [ParallelInstance(src[:-1], src[-1:], tgt, 1)]
+            action_sequence = ['COMMIT', 'VERB', 'NEXTWORD', 'WAIT']
+            # Create some states to train on
+            instances = []
+            fl = FeatureLookup()
+            s = {}
+            s[-1] = State(l, SequenceTranslation(0), 0)
+            for kk, aa in enumerate(action_sequence):
+                s[kk] = s[kk - 1].evolve_state(aa, s[kk - 1].input_position + 1)
+                costs = InstanceFactory.build_costs(s[kk])
+                instances.append(InstanceFactory.fl_generate_train(s[kk], costs, fl))
+
+    cif = InstanceFactory(fl, nw, vp, ot, flags.bleu_width)
+    cp = ClassifierPolicy(cif, degenerate_option="exclude")
+    cp.train(instances, flags.rounds)
+    cp.dump(flags.output)
