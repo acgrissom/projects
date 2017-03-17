@@ -5,7 +5,7 @@ import codecs
 from collections import defaultdict
 from feature_extractor cimport *
 #from wabbit_wappa import *
-from bunny_lure import BinaryLogisticScorer, ClassifierScorer
+from bunny_lure import BinaryLogisticScorer, ClassifierScorer, OAAScorer
 from operator import itemgetter
 import text_tools
 
@@ -100,15 +100,15 @@ cdef class LuceneNextWordPredictor(NextWordPredictor):
     cpdef lucene_proc
     def __init__(self, unicode suggester_filename,
                  int ngram=2,
-                 unicode predictor_path=u"LuceneNextWordPredictor/dist",
-                 unicode lib_path=u"LuceneNextWordPreditor/lib"):
+                 unicode predictor_path=u"../",
+                 unicode lib_path=u"../LuceneNextWordPreditor/lib"):
                  
         self.ngram = ngram
         self.suggester_filename = suggester_filename
         cdef unicode command = unicode(os.environ["JAVA_HOME"]) + u"/bin/java "
         command += u" -cp " + lib_path + u" "
         command += u" -jar "
-        command += predictor_path + u"/LuceneNextWordPredictor.jar "
+        command += predictor_path + u"/./LuceneNextWordPredictor/dist/LuceneNextWordPredictor.jar "
         command += u" search "
         command += suggester_filename + u" "
         command += unicode(ngram) + u" "
@@ -126,7 +126,7 @@ cdef class LuceneNextWordPredictor(NextWordPredictor):
         
 
     cpdef tuple predict(self, list words):
-        print "words:",words
+        #print "words:",words
         cdef unicode prefix = u" ".join(words) + u" "
         cdef unicode word
         cdef double prob
@@ -541,6 +541,7 @@ cdef class VWOAAVerbPredictor(VerbPredictor):
     cpdef public classifier
     cpdef public  feature_extractor
     cpdef public vw_outfile
+    cdef int num_labels
     def __init__(self,
                  unicode model_path,
                  feature_extractor=GermanTaggedFeatureExtractor(),
@@ -553,7 +554,8 @@ cdef class VWOAAVerbPredictor(VerbPredictor):
             self.load_verb_indices(model_path.replace(".model","") + ".labels")
         else:
             self.load_verb_indices(labels_file)
-        self.classifier = ClassifierScorer(model_path)
+            self.num_labels = len(self.verb_indices)
+        self.classifier = OAAScorer(model_path, self.num_labels)
         self.vw_outfile = codecs.open(model_path + ".test-audit.vw",
                                       "w", encoding="utf-8",
                                       errors='ignore')
@@ -569,10 +571,14 @@ cdef class VWOAAVerbPredictor(VerbPredictor):
         #not actually a probabilityb
         #print "scoring"
         #cdef float cur_prob = self.classifier.score_prediction(vw_string)
-        cdef int predicted_class_num = self.classifier.classify(vw_string)
+        #cdef int predicted_class_num = self.classifier.classify(vw_string)
+        #cdef float predicted_class_score = self.classifier.score(vw_string)
+        cdef tuple top = self.classifier.rank(vw_string)[0]
+        #print(top)
+        cdef prediction_tuple = (top[0], self.verb_indices[top[1]])
         #print self.verb_indices[predicted_class_num]
         #return cur_prob, self.verb_indices[predicted_class_num] stalling for some reason
-        return 1, self.verb_indices[predicted_class_num]
+        return prediction_tuple
 
 
     cpdef unicode convert_features_to_vw_format(self, dict ns_features):
@@ -718,51 +724,51 @@ cdef class VWBinaryMostCommonVerbPredictor(VWBinaryVerbPredictor):
     cpdef tuple predict(self, list words):
         return 1.0, self.most_common_label
 
-from sklearn.externals import joblib
-cdef class SKLSVMVerbPredictor(VerbPredictor):
-    cpdef unicode model_path
-    cpdef dict verb_indices
-    cpdef classifier
-    cpdef feature_extractor
+# from sklearn.externals import joblib
+# cdef class SKLSVMVerbPredictor(VerbPredictor):
+#     cpdef unicode model_path
+#     cpdef dict verb_indices
+#     cpdef classifier
+#     cpdef feature_extractor
     
-    def __init__(self,
-                 unicode model_path,
-                 feature_extractor=GermanTaggedFeatureExtractor(),
-                 ):
-        self.model_path = model_path
-        self.feature_extractor = feature_extractor
-        #vw = VW(loss_function='logistic', i = model_path)
-        self.verb_indices = {}
-        self.load_verb_indices(model_path.replace("-svm.pkl","") + ".labels")
-        sys.stderr.write("Loading classifier: " + model_path + "\n")
-        self.classifier = joblib.load(model_path)
+#     def __init__(self,
+#                  unicode model_path,
+#                  feature_extractor=GermanTaggedFeatureExtractor(),
+#                  ):
+#         self.model_path = model_path
+#         self.feature_extractor = feature_extractor
+#         #vw = VW(loss_function='logistic', i = model_path)
+#         self.verb_indices = {}
+#         self.load_verb_indices(model_path.replace("-svm.pkl","") + ".labels")
+#         sys.stderr.write("Loading classifier: " + model_path + "\n")
+#         self.classifier = joblib.load(model_path)
         
-    cpdef str name(self):
-        return "SKLearnSVMVerbPredictor"
+#     cpdef str name(self):
+#         return "SKLearnSVMVerbPredictor"
     
-    cpdef tuple predict(self, list words):
-        #cdef unicode preverb = u" ".join(words)
-        cdef dict ns_features = self.feature_extractor.get_features_from_tagged(words)
-        cdef unicode instance_string = self.convert_to_instance(ns_features)
+#     cpdef tuple predict(self, list words):
+#         #cdef unicode preverb = u" ".join(words)
+#         cdef dict ns_features = self.feature_extractor.get_features_from_tagged(words)
+#         cdef unicode instance_string = self.convert_to_instance(ns_features)
         
-        cdef float cur_prob = 1.0 #not meaningful here
-        cdef int predicted_class_num = self.classifier.predict(instance_string)
-        #This might need to return the first index of the array
-        return cur_prob, self.verb_indices[predicted_class_num]
+#         cdef float cur_prob = 1.0 #not meaningful here
+#         cdef int predicted_class_num = self.classifier.predict(instance_string)
+#         #This might need to return the first index of the array
+#         return cur_prob, self.verb_indices[predicted_class_num]
 
-    cpdef unicode convert_to_instance(self, dict ns_features):
-        cdef unicode instance = u""
-        #SKL doesn't have namespaces; just combine them with a dash
+#     cpdef unicode convert_to_instance(self, dict ns_features):
+#         cdef unicode instance = u""
+#         #SKL doesn't have namespaces; just combine them with a dash
 
-        for nspace in ns_features.keys():
-            for feature in ns_features[nspace]:
-                instance += nspace + u"-" + feature + u" "
-        return instance            
+#         for nspace in ns_features.keys():
+#             for feature in ns_features[nspace]:
+#                 instance += nspace + u"-" + feature + u" "
+#         return instance            
                     
 
-    cdef load_verb_indices(self, unicode filename):
-        in_file = codecs.open(filename, 'r',encoding="utf-8")
-        for line in in_file:
-            label = line.split("\t")[0]
-            idx = int(line.split("\t")[1])
-            self.verb_indices[idx] = label
+#     cdef load_verb_indices(self, unicode filename):
+#         in_file = codecs.open(filename, 'r',encoding="utf-8")
+#         for line in in_file:
+#             label = line.split("\t")[0]
+#             idx = int(line.split("\t")[1])
+#             self.verb_indices[idx] = label

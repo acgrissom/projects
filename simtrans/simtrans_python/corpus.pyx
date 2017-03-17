@@ -1,3 +1,6 @@
+# cython: c_string_type=unicode, c_string_encoding=utf8, language_level=3
+# -*- coding: utf-8 -*-o
+
 from csv import DictReader
 from collections import defaultdict
 import sys
@@ -35,8 +38,31 @@ class Sentence:
             obs_verb.append(ii)
             yield (obs_preverb, obs_verb)
 
+#Doesn't work with unicode
+class UnicodeDictReader:
+    """
+    A CSV reader which will iterate over lines in the CSV file "f",
+    which is encoded in the given encoding.
+    """
 
+    def __init__(self, f, dialect='excel', encoding="utf-8", **kwds):
+        self.encoding = encoding
+        self.reader = DictReader(f, dialect=dialect, **kwds)
+
+    def next(self):
+        row = self.reader.next()
+        return {k: unicode(v, "utf-8") for k, v in row.iteritems()}
+
+    def __iter__(self):
+        return self
+
+import codecs
 class Corpus:
+    # def UnicodeDictReader(utf8_data, **kwargs):
+    #     csv_reader = DictReader(utf8_data, **kwargs)
+    #     for row in csv_reader:
+    #         yield {unicode(key, 'utf-8'):unicode(value, 'utf-8') for key, value in row.iteritems()}
+
     """
     Given CSV representation of the data, provide programmatic access
     """
@@ -44,7 +70,8 @@ class Corpus:
     def __init__(self, csv_file):
         self._sentences = defaultdict(dict)
 
-        dr = DictReader(open(csv_file))
+        #dr = DictReader(codecs.open(csv_file, 'r', encoding='utf-8', errors='ignore'))
+        dr = UnicodeDictReader(open(csv_file, 'rb'))
         num = 0
         for ii in dr:
             self._sentences[ii['fold']][ii['id']] = Sentence(ii)

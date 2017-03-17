@@ -28,7 +28,6 @@ cpdef float brevity_penalty(list references, output):
     cdef float brevity_penalty
     cdef float output_len = float(len(output))
     #for ref in references:
-    reference_length = min(1, output_len / reference_length)
     # reference_length = min([len(x) for x in references],
     #                        key= lambda y: y - len(output))
     brevity_penalty = min(1, output_len / reference_length)

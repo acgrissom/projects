@@ -711,7 +711,7 @@ cdef class GermanTaggedFeatureExtractor(FeatureExtractor):
                  bint use_preverb_length=False,
                  int ngram=2,
                  ngram_scorer=None,
-                 int articles_ngrams=-1,
+                 int articles_ngrams=2,
                  int tag_ngrams=-1):
         self.use_position = use_position
         self.ngram = ngram

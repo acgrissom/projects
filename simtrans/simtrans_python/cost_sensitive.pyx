@@ -3,7 +3,7 @@ pyximport.install()
 import cython
 import logging
 import cPickle as pickle
-
+import sys
 from parallel_corpus import ParallelInstance
 from feature_preprocessing import FeatureLookup, FilterFeatureLookup
 from policy import OptimalPolicy, State, VALID_ACTIONS, BatchPolicy, \
@@ -23,7 +23,7 @@ class ClassifierPolicy(Policy):
             "Don't know what to do with: %s" % degenerate_option
         self._deg_opt = degenerate_option
 
-    def train(self, instances, rounds=15):
+    def train(self, instances, rounds=4):
         if self._deg_opt == "exclude":
             self._classifier.train([x for x in instances if not x.degenerate], rounds=rounds)
         else:
@@ -176,7 +176,7 @@ class InstanceFactory:
         total_length = state.lattice.source_length() * 1.0
         features["SRC_POS"] = (len(source) + 1) / total_length
         features["TG_POS"] = (len(target) + 1) / total_length
-
+        
         # previous action
         # if len(state.history) != 0:
         #     features["PREV_ACT_%s" % state.history[-1]] = 1.0
@@ -251,6 +251,7 @@ class Searn:
             yield action
 
     def build_features(self, num_features=1000, min_count=1):
+        cdef int sent_num = 0
         fl = FilterFeatureLookup()
         # Create an instance factory that uses all features (i.e., not using the
         # filter feature lookup)
@@ -258,6 +259,9 @@ class Searn:
                               self._trans, self._bleu_width)
         op = OptimalPolicy(self._nw, self._verb, self._bleu_width, self._trans)
         for ii in self._trn:
+            sent_num += 1
+            if(sent_num % 10 == 0):
+                sys.stderr.write("INFO:build_features:Sentence " + str(sent_num))
             # Get latice and optimal policy for this example
             lat = op.find_optimal(ii)
             for jj in cif.run_policy(lat, op):

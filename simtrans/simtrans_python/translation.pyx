@@ -204,7 +204,6 @@ cdef class SequenceTranslation(Translation):
 
         if current:
             assert isinstance(current, Translation)
-            print (u" ".join(current.as_list()))
             for ii in current._words:
                 if not ii in self._words:
                     self._words[ii] = current._words[ii]
@@ -272,6 +271,87 @@ cdef class JoshuaTranslator(Translator):
 
         self.joshua_command += u" -v 0"
         self.joshua_command = self.joshua_command.replace("JOSHUA",joshua_dir)
+        print(self.joshua_command)
+        self.initialize()
+        #self.test_translate()
+
+    cpdef initialize(self):
+        self.joshua_process = subprocess.Popen(self.joshua_command.split(),
+                                           stdin=subprocess.PIPE,
+                                           stdout=subprocess.PIPE,
+                                           #stderr=subprocess.PIPE,
+                                           close_fds=True,
+                                           universal_newlines=True,
+                                           shell=False)
+        self.joshua_process.stdin = codecs.getwriter('utf8')(self.joshua_process.stdin)
+        print("************Chainging directory to",self.old_pwd)
+        os.chdir(self.old_pwd)
+
+    cpdef Translation translate(self, unicode sentence):
+        self.joshua_process.stdin.write(sentence)
+        self.joshua_process.stdin.write("\n")
+        self.joshua_process.stdin.flush()
+        self.joshua_process.stdout.flush()
+        #self.joshua_process.stderr.flush()
+        cdef unicode translation = unicode(self.joshua_process.stdout.readline().strip().decode('utf8'))
+
+        #sys.stdout.write("\033[K")
+        #sys.stdout.write(translation + "\r")
+        cdef dict words = dict()
+        cdef dict probs = dict();
+        cdef int i = 0
+        for w in translation.split():
+            words[i] = w
+            probs[i] = 1.0
+            i += 1
+        t = Translation(words, probs)
+        return t
+
+    
+    """I'm assuming that this is a list of lists of verbs with index 0 the best one.
+    """
+    cpdef Translation top(self, _id, list words, list verbs):
+        cdef unicode sentence
+        if len(verbs) > 0:
+            sentence = u" ".join(words + [u" ".join(verbs[0])])
+        else:
+            sentence = u" ".join(words)
+        return self.translate(sentence)
+
+
+    cpdef test_translate(self):
+        print(u"command",self.joshua_command)
+        #self.joshua_process.stdin.write(u"Editado por Héroes de Papel, se trata de un libro que homenajea a la saga de videojuegos creada por Yu Suzuki, siendo un obsequio tanto para los fans de la misma como un reconocimiento crítico a uno de los mayores logros en construcción de mundos virtuales.\n".encode("utf8"))
+        cdef unicode test_sentence = u"Editado por Héroes de Papel, se trata de un libro que homenajea a la saga de videojuegos creada por Yu Suzuki, siendo un obsequio tanto para los fans de la misma como un reconocimiento crítico a uno de los mayores logros en construcción de mundos virtuales"
+        #print(u"Sending sentence",test_sentence)
+        self.joshua_process.stdin.write(test_sentence)
+        self.joshua_process.stdin.write("\n")
+            
+        #self.joshua_process.stdin.write("me llamo alvino\n")
+        self.joshua_process.stdin.flush()
+        self.joshua_process.stdout.flush()
+        #self.joshua_process.stderr.flush()
+        out = self.joshua_process.stdout.readline().strip()
+        #err = self.joshua_process.stderr.readline().strip()
+        print(u"****************Test Translation::",out)
+        #print u"err:",err
+cdef class JoshuaPackTranslator(Translator):
+    cpdef unicode lang_pack_dir
+    cdef unicode joshua_command
+    cpdef unicode joshua_root
+    cdef unicode old_pwd
+    cpdef joshua_process
+    def __init__(self,
+                  unicode lang_pack_dir,
+                  unicode mem=u"8g",
+                  int topn=0):
+        self.lang_pack_dir = lang_pack_dir
+        self.old_pwd = unicode(os.getcwd())
+        os.chdir(lang_pack_dir)
+        #cdef unicode joshua_dir = unicode(os.environ["JOSHUA"])
+        self.joshua_command = lang_pack_dir + "/joshua"
+        self.joshua_command += " --threads 10"
+
         print(self.joshua_command)
         self.initialize()
         #self.test_translate()

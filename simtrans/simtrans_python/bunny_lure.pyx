@@ -88,13 +88,16 @@ cdef class ClassifierScorer:
         #if label == 0:
         #    label = 1
         return label
+    cdef float sigmoid(self, float x):
+        return 1 / (1 + math.exp(-x))
+
             
     """
     Should be overridden for different scoring metrics.
     By default, returns probability of logistic classification.
     """
     cpdef float score_prediction(self, unicode vw_string):
-        print "in score prediction"
+        print "in score prediction.  WARNING: Should be overwritten."
         cdef str out
         cdef str err
         cdef float score
@@ -150,11 +153,11 @@ cdef class ClassifierScorer:
 cdef class OAAScorer(ClassifierScorer):
     def __init__(self, unicode model_path, int num_classes):
         #TODO(acg) For some reason, the isn't setting the instance variables
-        score_command= u'vw -b 30 -i --loss=logistic ' + model_path + u' -t -r /dev/stdout'
+        score_command= u'vw   -i  ' + model_path + u" -t -r /dev/stdout"
         #score_command = "java Echo"
         #score_command += u' -q pl'
         #score_command += " --oaa " + str(num_classes) + ' '
-        classify_command = u'vw -b 30 -i --loss=logistic' + model_path + u' -t -p /dev/stdout'
+        classify_command = u"vw -i"  + model_path + u" -t -p /dev/stdout"
         #classify_command += u'--ngram 2'
         #classify_command += u' -q pl '
         
@@ -166,9 +169,37 @@ cdef class OAAScorer(ClassifierScorer):
         sys.stderr.write("classifier cmd: " + self.classify_command + "\n")
         sys.stderr.write("score cmd: " + self.score_command + "\n")
 
+    cpdef list rank(self, unicode vw_string):
+        cdef str out
+        cdef str err
+        cdef float score
+        cdef list out_list
+        #self.score_proc.stdin.write(to_stdin.encode("utf-8"))
+        try:
+            self.score_proc.stdin.write((vw_string + u"\n").encode("utf8"))
+        except:
+            print("Failure in score_prediction.  Exiting.")
+            sys.exit(1)
+        self.score_proc.stdin.flush()
+        self.score_proc.stdout.flush()
+        out = self.score_proc.stdout.readline()
+        out_list = out.split()
+        cdef str ss
+        cdef list lst
+        cdef int class_num
+        cdef list class_scores = list()
 
-    # cpdef float score_prediction(self, unicode vw_string):
-    #     return 1.0
+        for ss in out_list:
+            lst = ss.split(":")
+            if len(lst) != 2:
+                continue
+            class_num = int(lst[0])
+            score = float(lst[1])
+            score = self.sigmoid(score)
+            class_scores.append((score,class_num))
+        class_scores = sorted(class_scores, key=operator.itemgetter(0), reverse=True)
+        return class_scores
+
 
     cpdef int classify(self, unicode vw_string):
         cdef str out
@@ -267,6 +298,9 @@ cdef class CSOAAClassifier(ClassifierScorer):
                                                    classify_command=self.classify_command,
                                                    score_command=self.score_command
             )
+    cdef float sigmoid(self, float x):
+        return 1 / (1 + math.exp(-x))
+
 
     cpdef list rank(self, unicode vw_string):
         cdef str out
@@ -294,8 +328,9 @@ cdef class CSOAAClassifier(ClassifierScorer):
                 continue
             class_num = int(lst[0])
             score = float(lst[1])
-            class_scores.append((self.all_labels[class_num],score))
-        class_scores = sorted(class_scores, key=operator.itemgetter(1), reverse=False)
+            score = self.sigmoid(score)
+            class_scores.append((score,self.all_labels[class_num]))
+        class_scores = sorted(class_scores, key=operator.itemgetter(0), reverse=True)
         return class_scores
         # try:
         #     score = self.sigmoid(float(out))

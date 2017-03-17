@@ -1,4 +1,4 @@
-# cython: c_string_type=unicode, c_string_encoding=utf8, language_level=2
+# cython: c_string_type=unicode, c_string_encoding=utf8, language_level=3
 # -*- coding: utf-8 -*-o
 #import pyximport; pyximport.install()
 from sentence_extraction import *
@@ -6,7 +6,7 @@ from sentence_extraction import *
 from feature_extractor import JapaneseSentenceFeatureExtractor
 import string
 import codecs
-import csv
+import unicodecsv 
 import mecab_interface
 cpdef inline list utf_encode(list csv_line):
      cpdef int index
@@ -130,7 +130,7 @@ cdef class JapaneseCrowdflowerReader(LabeledDataFileReader):
         self.valid_classes = dict()
         self.column_indexes = dict()
         self.set_filename(filename)
-        self.pos_csv_file = csv.reader(open(filename,'r'))
+        self.pos_csv_file = unicodecsv.reader(codecs.open(filename,'r',encoding='utf-8',errors='ignore'))
         self.header = self.next()
         self.mecab_analyze = mecab_interface.MecabInterface()
         cdef int i = 0
@@ -180,8 +180,8 @@ cdef class JapaneseCrowdflowerReader(LabeledDataFileReader):
         if next_line is None:
             return None
         self.line_num += 1
-        return next_line
-        #return utf_encode(next_line)
+        #return next_line
+        return utf_encode(next_line)
 
     def __iter__(self):
         return self
@@ -212,7 +212,7 @@ cdef class POSCSVFileReader(LabeledDataFileReader):
     cdef list header
     cdef readonly pos_csv_file
     cdef int class_column
-
+    cdef unicode fold
     def __next__(self):
         if self.line == 0:
             self.line = self.line + 1
@@ -227,6 +227,9 @@ cdef class POSCSVFileReader(LabeledDataFileReader):
                     return None
         return next_line
         #return utf_encode(next_line)
+
+    cpdef unicode get_fold(self, list line_list):
+        return unicode(line_list[6])
 
     cpdef unicode get_class(self, list line_list):
         return <unicode>line_list[self.class_column]
@@ -243,19 +246,25 @@ cdef class POSCSVFileReader(LabeledDataFileReader):
     """Returns unicode string of entire source text, including verb."""
     cpdef unicode get_entire_source_text(self, list line_list):
         #return unicode(line_list[2],"UTF-8")
-        return line_list[2]
+        return unicode(line_list[2])
 
     cpdef unicode get_target_text(self, list line_list):
-        return line_list[1]
+        return unicode(line_list[1])
 
     cpdef unicode get_tagged_source_text(self, list line_list):
-        return line_list[3]
+        return unicode(line_list[3])
 
     cpdef unicode get_preverb_text(self, list line_list):
-        return line_list[4]
+        return unicode(line_list[4])
+
+    cpdef unicode get_verb(self, list line_list):
+        return unicode(line_list[5])
 
     cpdef list get_context_tokens(self, list line_list):
         return self.get_preverb_text(line_list).split()
+
+    cpdef unicode get_id(self, list line_list):
+        return unicode(line_list[0])
 
     """
     Sets the column to be considered as the class to classify.
@@ -271,17 +280,16 @@ cdef class POSCSVFileReader(LabeledDataFileReader):
         self.valid_classes = dict()
         self.column_indexes = dict()
         self.set_filename(filename)
-        self.pos_csv_file = csv.reader(codecs.open(filename,
-                                                   'r',encoding="utf-8",
-                                                   errors='ignore'))
+        self.pos_csv_file = unicodecsv.reader(open(filename,'rb'))
+        #self.pos_csv_file = unicodecsv.reader(codecs.open(filename,'r'))
         self.header = self.next()
         cdef int i = 0
         #creates a dctionary mapping from column names to indices
-        cdef str col
+        #cdef str col
         for col in self.header:
             self.column_indexes[col] = i
             i += 1
-        self.set_class_column(u'verb')
+        self.set_class_column('verb')
 
     def __iter__(self):
         return self
@@ -346,7 +354,7 @@ cdef class TaggedGermanFileReader(LabeledDataFileReader):
         cdef list next_line = self.parse_line(self.filereader.next())
         self.line += 1
         if len(self.valid_classes) != 0:
-            while self.get_class(next_line) not in self.valid_classes.keys():
+            while self.get_class(next_line) not in self.valid_classes.keys() and (self.fold != self.get_fold(next_line)):
                 self.unparsed_line = self.filereader.next()
                 next_line  = self.parse_line(self.unparsed_line)
                 #next_line  = utf_encode(self.filereader.next().split())

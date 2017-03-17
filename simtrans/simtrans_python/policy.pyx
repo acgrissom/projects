@@ -24,7 +24,7 @@ from parallel_corpus import ParallelInstance
 from translation import Translation, SequenceTranslation, Translator
 
 VALID_ACTIONS = set(["WAIT", "VERB", "NEXTWORD", "COMMIT"])
-BLEU_WIDTH = 4
+
 
 
 class WeightedTrainingSet:
