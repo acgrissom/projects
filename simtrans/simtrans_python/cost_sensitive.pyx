@@ -105,7 +105,7 @@ class InstanceFactory:
         weight = 1 + words_left
 
         # weight different actions
-        action_cost = {'VERB':10, 'NEXTWORD':2, 'COMMIT':1, 'WAIT':0.5}
+        action_cost = {'VERB':10, 'NEXTWORD':2, 'COMMIT':1, 'WAIT':0.5, 'UM':0.5}
 
         if not opt is None:
             opt_action = opt.action(state)

@@ -21,7 +21,7 @@ from random import random
 from prediction import VerbPredictor, NextWordPredictor
 from multi_bleu import MultiBleu
 from parallel_corpus import ParallelInstance
-from translation import Translation, SequenceTranslation, Translator
+from translation import Translation, SequenceTranslation, Translator, OmniscientTranslator
 
 VALID_ACTIONS = set(["WAIT", "VERB", "NEXTWORD", "COMMIT"])
 
@@ -49,6 +49,7 @@ class SentenceStateLattice:
         self.references = references
         self.nw = nw_pred
         self.vb = vb_pred
+        self.last_commit_index = 0 #acg
         self.id = id
         self.trans = trans
 
@@ -65,7 +66,7 @@ class SentenceStateLattice:
         self._verb_guesses = None
         self._word_guesses = None
         self._commit_guesses = None
-
+        self._um_guesses = None
         self._policy_cost = None
 
     def next_trans(self, pos, action):
@@ -93,6 +94,8 @@ class SentenceStateLattice:
             val = Translation()
         elif action == "NEXTWORD":
             val = self._word_guesses[pos]
+        elif action == "UM":
+            val = self._um_guesses[pos]
 
         assert isinstance(val, Translation), "No translation for %s in %i" % \
             (action, pos)
@@ -159,41 +162,72 @@ class SentenceStateLattice:
         #verb_guess = self.full_verb
 
         logging.debug("GUESS %i %s %s", index, prefix, verb)
+        if isinstance(self.trans, OmniscientTranslator):
+            if index >= start:
+                prob, nw = self.nw.predict(prefix + verb)
+                self._commit_guesses[index] = self.trans.top(self.id, prefix,
+                                                             verb)
+                if verb_guess:
+                    self._verb_guesses[index] = self.trans.top(self.id, prefix,
+                                                                verb_guess)
+                else:
+                    self._verb_guesses[index] = Translation()
 
-        if index >= start:
-            prob, nw = self.nw.predict(prefix + verb)
-
-            self._commit_guesses[index] = self.trans.top(self.id, prefix,
-                                                         verb)
-            if verb_guess:
-                self._verb_guesses[index] = self.trans.top(self.id, prefix,
-                                                            verb_guess)
+                if nw:
+                    self._word_guesses[index] = self.trans.top(self.id, prefix,
+                                                                verb + [nw])
+                else:
+                    self._word_guesses[index] = Translation()
             else:
-                self._verb_guesses[index] = Translation()
+                prob, nw = self.nw.predict(prefix)
 
-            if nw:
-                self._word_guesses[index] = self.trans.top(self.id, prefix,
-                                                            verb + [nw])
+                self._commit_guesses[index] = \
+                    self.trans.top(self.id, prefix, [])
+
+                if verb_guess:
+                    self._verb_guesses[index] = self.trans.top(self.id, prefix,
+                                                                verb_guess)
+                else:
+                    self._verb_guesses[index] = Translation()
+
+                if nw:
+                    self._word_guesses[index] = \
+                        self.trans.top(self.id, prefix + [nw], [])
+                else:
+                    self._word_guesses[index] = Translation()
+        else: #real translator
+            if index >= start:
+                prob, nw = self.nw.predict(prefix)
+                self._um_guesses[index] = self.trans.top(self.id, prefix + [",umm,"],[])
+                self._commit_guesses[index] = self.trans.top(self.id, prefix)
+                if verb_guess:
+                    self._verb_guesses[index] = self.trans.top(self.id, prefix,
+                                                                verb_guess)
+                else:
+                    self._verb_guesses[index] = Translation()
+
+                if nw:
+                    self._word_guesses[index] = self.trans.top(self.id, prefix + [nw], [])
+                else:
+                    self._word_guesses[index] = Translation()
             else:
-                self._word_guesses[index] = Translation()
-        else:
-            prob, nw = self.nw.predict(prefix)
+                prob, nw = self.nw.predict(prefix)
+                self._um_guesses[index] = self.trans.top(self.id, prefix + [",umm,"],[])
+                self._commit_guesses[index] = \
+                    self.trans.top(self.id, prefix, [])
 
-            self._commit_guesses[index] = \
-                self.trans.top(self.id, prefix, [])
+                if verb_guess:
+                    self._verb_guesses[index] = self.trans.top(self.id, prefix,
+                                                                verb_guess)
+                else:
+                    self._verb_guesses[index] = Translation()
 
-            if verb_guess:
-                self._verb_guesses[index] = self.trans.top(self.id, prefix,
-                                                            verb_guess)
-            else:
-                self._verb_guesses[index] = Translation()
-
-            if nw:
-                self._word_guesses[index] = \
-                    self.trans.top(self.id, prefix + [nw], [])
-            else:
-                self._word_guesses[index] = Translation()
-
+                if nw:
+                    self._word_guesses[index] = \
+                        self.trans.top(self.id, prefix + [nw],[])
+                else:
+                    self._word_guesses[index] = Translation()
+                                                 
         logging.debug("Guess %i: C: %s V: %s W: %s", index,
                       " ".join(self._commit_guesses[index].as_list()),
                       " ".join(self._verb_guesses[index].as_list()),
@@ -211,6 +245,7 @@ class SentenceStateLattice:
 
         self._verb_guesses = defaultdict(dict)
         self._word_guesses = defaultdict(dict)
+        self._um_guesses = defaultdict(dict)
         self._commit_guesses = {}
 
         total_length = self.source_length()
@@ -496,7 +531,7 @@ class State:
         #    "New state must be later than current state: %i (was %i)" % \
         #    (new_pos, self.input_position)
 
-        if action == "COMMIT" or action == "NEXTWORD" or action == "VERB":
+        if action == "COMMIT" or action == "NEXTWORD" or action == "VERB" or action == "UM":
             # This is the one-off translation of taking this action in a
             # given state.  Because we're moving to new_pos, this should
             # be based on new_pos -1 (as there are implicit waits after
@@ -672,8 +707,9 @@ class OptimalPolicy(Policy):
         lattice = self.build_lattice(example)
         lattice.build_table(forward_backward=forward_backward)
         self._policies[example.id] = dict(lattice.optimal_actions())
+        cdef int _id = int(example.id)
         logging.debug("Adding policy for sent %i with states %s",
-                      example.id, unicode(self._policies[example.id].keys()))
+                      _id, unicode(self._policies[example.id].keys()))
         return lattice
 
     def action(self, state):

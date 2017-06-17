@@ -1,0 +1,5 @@
+import sys
+f = open("../pos.csv","r")
+for line in f:
+        if line.find("test1") > 0:
+            sys.stdout.write(line)
