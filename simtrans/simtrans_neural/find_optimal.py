@@ -1,7 +1,10 @@
 from collections import defaultdict
 from dijkstar import Graph, find_path
 import networkx as nx
-
+import math
+import matplotlib.pyplot as plt
+import sys
+import random
 
 class OptimalPolicy:
     def __init__(self):
@@ -39,29 +42,73 @@ class OptimalPolicy:
                 sublist.append(sub) 
         return sublist 
   
-    def build_trellis(self, sentence_words, possible_actions):
-        graph = Graph()
+    def build_trellis(self,
+                      sentence_words,
+                      possible_actions,
+                      max_depth=4,
+                      start_index=0,
+                      start_state_name=None):
+        original_words = sentence_words
+        sentence_words = sentence_words[start_index:]
+        start_state = None
+
+        if len(sentence_words) == 0:
+            return (0,'END')
+        if start_state_name is None:
+            START_STATE = 'START'
+        else:
+            START_STATE = start_state_name
         g = nx.DiGraph()
-        graph.add_edge(0, 1, {'cost' : 0, 'action' : 'WAIT', 'step' : 0}) # 0 -> 1
-        g.add_edge('START', 1, weigh =1)
+        g.add_node(START_STATE)
         j = len(sentence_words) + 1
-        prev_layer_edges = [0]
-        prev = ['START']
-        for i in range(len(sentence_words)):
-            this_layer_edges = []
-            this = []
+        #prev_layer_edges = [0]
+        prev_layer = [START_STATE]
+        for i in range(min(len(sentence_words), max_depth)):
+            #this_layer_edges = []
+            this_layer = []
             word = sentence_words[i]
             for action in possible_actions:
-                #for pe in prev_layer_edges:
-                for pe in prev:
-                    graph.add_edge(pe, j, {'cost' : 1, 'action' : action, 'step' : i + 1})                   
-                    g.add_edge(pe, action + str(i))
-                    this_layer_edges.append(j)
-                    this.append(prev)
+                for pe in prev_layer:
+                    score = 0
+                    if action == 'W':
+                        score = 0
+                    else:
+                        score = 1
+                    g.add_edge(pe, action + '_' + str(j), weight=score)
+                    #this_layer_edges.append(j)
+                    this_layer.append(action + '_' + str(j))
                     j += 1
-            prev_layer_edges = this_layer_edges
+            #prev_layer_edges = this_layer_edges
+            prev_layer = this_layer
 
-        return g
+        best_path = None
+        best_score = -math.inf
+        for leaf in prev_layer:
+            path = nx.single_source_dijkstra(g, START_STATE, leaf)
+            #print(path)
+            if path[0] > best_score:
+                best_score = path[0]
+                best_path = path
+        
+        #Convert best path to normal list
+        print(best_path)
+        sys.exit()
+        best_path_cost = best_path[0] 
+        best_step = best_path[1][1] #check, might need 
+
+        all_best_steps = []
+
+        #sys.exit()
+        #print(sentence_words[max_depth-1:])
+        all_best_steps += [best_step]
+        all_best_steps += self.build_trellis(original_words,
+                                             possible_actions,
+                                             max_depth,
+                                             start_index + 1,
+                                             start_state_name=best_step)
+        print(all_best_steps)
+
+        return all_best_steps
 
 
 
@@ -110,8 +157,27 @@ class State:
 
 
 o = OptimalPolicy()
-g = o.build_trellis("a b c d".split(), ["W","C"])
+g = o.build_trellis("a b c d e".split(), ["W","C"])
+sys.exit()
 #cost_func = lambda u, v, e, prev_e: e['cost']
 #path = find_path(g, 0, 8, cost_func=cost_func)
 #print(path)
-nx.draw(g)
+
+pos=nx.spring_layout(g) # positions for all nodes
+
+
+# labels
+
+
+from networkx.drawing.nx_agraph import write_dot
+from networkx.drawing.nx_agraph import graphviz_layout
+
+#nx.draw_networkx_labels(g,pos,font_size=20,font_family='sans-serif')
+write_dot(g,'test.dot')
+
+# same layout using matplotlib with no labels
+plt.title('draw_networkx')
+pos=graphviz_layout(g, prog='dot')
+nx.draw(g, pos, with_labels=False, arrows=False)
+plt.savefig('nx_test.png')
+#nx.draw(g)
