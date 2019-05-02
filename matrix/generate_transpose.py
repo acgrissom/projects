@@ -1,3 +1,4 @@
+#Generates random matirces
 import random
 import sys
 import numpy as np
