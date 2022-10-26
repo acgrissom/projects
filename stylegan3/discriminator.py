@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import ImageGrid
 import statsmodels.api as sm
 import pylab as py
-import kornia
 import cv2
 
 with open('models/stylegan3-r-ffhq-1024x1024.pkl', 'rb') as f:
@@ -26,16 +25,8 @@ resize = torchvision.transforms.Resize((1024,1024))
 
 def main():
     #convert_rbg_to_lab("ffhq_images_1024x1024/*","ffhq_images_1024x1024_lab_format/*")
-    files = glob.glob("CleanedAsianMenLongHair/*")
-    result = []
-    for file in files:
-        pic = torchvision.io.read_image(file).cuda()
-        pic = resize(pic)
-        score = D(pic[None,:,:,:],c=None).cuda()
-        result.append(float(score.cpu().numpy()[0][0])) 
-    print(result)
-    """
-    files = ["dictionary9.txt","dictionary19.txt","dictionary29.txt","dictionary39.txt","dictionary49.txt"]
+    read_images_get_scores()
+    files = ["dictionary9.txt","dictionary19.txt","dictionary29.txt","dictionary39.txt","dictionary49.txt","dictionary59.txt","dictionary69.txt"]
     dict_list = []
     for file in files:
         with open(file, 'r') as convert_file:
@@ -45,30 +36,35 @@ def main():
     complete_dict = {}
     for one_dict in dict_list:
         complete_dict = complete_dict | one_dict
-    test = np.array(list(complete_dict.values()))
-    print(test.shape)
-    sm.qqplot(test, line='45')
-    plt.show()
     complete_dict = dict(sorted(complete_dict.items(), key=lambda item: item[1]))
 
     scores = list(complete_dict.values())
     npscores = np.array(scores)
     print(f"Mean of scores is:{np.mean(npscores)}    Std of scores is:{np.std(npscores)} Median of scores is:{np.median(npscores)}")
-    x = list(range(50000))
+
     plt.figure(figsize=(15,10))
     plt.title("Scores for all 1024x1024 images")
     plt.ylabel("score")
-    sm.qqplot(npscores, line ='45')
-    py.show()
     plt.hist(scores, bins=1000)
     plt.savefig("score.png")
 
     files = list(complete_dict.keys())
     show_images(files[0:100],"Least 100")
     show_images(files[49900:], "Top 100")
-    """
+   
     
-
+def make_subdirectories(root_path):
+    paths = ['00000', '01000', '02000', '03000', '04000', '05000', '06000', '07000', '08000', '09000', '10000', '11000', 
+             '12000', '13000', '14000', '15000', '16000', '17000', '18000', '19000', '20000', '21000', '22000', '23000', 
+             '24000', '25000', '26000', '27000', '28000', '29000', '30000', '31000', '32000', '33000', '34000', '35000', 
+             '36000', '37000', '38000', '39000', '40000', '41000', '42000', '43000', '44000', '45000', '46000', '47000', 
+             '48000', '49000', '50000', '51000', '52000', '53000', '54000', '55000', '56000', '57000', '58000', '59000', 
+             '60000', '61000', '62000', '63000', '64000', '65000', '66000', '67000', '68000', '69000']
+    for items in paths:
+        path = os.path.join(root_path, items)
+        os.makedirs(path)
+    
+    
 def show_images(files, figurename):
     images = []
     for file in files:
@@ -96,7 +92,7 @@ def read_images_get_scores():
     """
     folders = os.listdir("ffhq_images_1024x1024")
     folders.sort()
-    for i in range(9,50,10):
+    for i in range(9,70,10):
         images = {}
         group = folders[i-9:i+1]
         txt = "dictionary"+str(i)+".txt"
@@ -130,16 +126,13 @@ def convert_rbg_to_lab(read_dir, write_dir):
     for i,(read_folder, write_folder) in enumerate(zip(read_folders, write_folders)): 
         read_folder = read_folder + "/*"
         image_paths = glob.glob(read_folder)
+        print(f"Reading images from folder {read_folder} and writing to folder {write_folder}")
         for one_path in image_paths:
-            print(f"Reading images from folder {one_path} and writing to folder {write_folder}")
             img = cv2.imread(one_path)
             splits = one_path.split("/")
             file_name = write_folder+"/"+splits[2]
             LAB_image = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
-            print(file_name)
             cv2.imwrite(file_name,LAB_image)
-            break
-        break
 
 # bad generated images in out directory: 5195, 5196, 5197, 5198, 5200, 5201, 
 

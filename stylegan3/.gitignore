@@ -3,3 +3,6 @@ fairface_training/
 fairface_zip/
 models/
 __pycache__/
+ffhq_images_1024x1024/
+ffhq_images_1024x1024_lab_format/
+dictionary*.txt
