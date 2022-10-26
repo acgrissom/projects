@@ -40,10 +40,11 @@ def main():
 
     scores = list(complete_dict.values())
     npscores = np.array(scores)
+    np.savetxt("score_for_lab_images.csv",npscores,delimiter=",")
     print(f"Mean of scores is:{np.mean(npscores)}    Std of scores is:{np.std(npscores)} Median of scores is:{np.median(npscores)}")
 
     plt.figure(figsize=(15,10))
-    plt.title("Scores for all 1024x1024 images")
+    plt.title("Scores for all 1024x1024 lab images")
     plt.ylabel("score")
     plt.hist(scores, bins=1000)
     plt.savefig("score.png")
@@ -68,7 +69,7 @@ def make_subdirectories(root_path):
 def show_images(files, figurename):
     images = []
     for file in files:
-        name = glob.glob("ffhq_images_1024x1024/*/"+str(file))
+        name = glob.glob("ffhq_images_1024x1024_lab_format/*/"+str(file))
         #print(name)
         image = Image.open(name[0])
         images.append(image)
@@ -90,17 +91,17 @@ def read_images_get_scores():
     """
     This function reads all the images and 
     """
-    folders = os.listdir("ffhq_images_1024x1024")
+    folders = os.listdir("ffhq_images_1024x1024_lab_format")
     folders.sort()
     for i in range(9,70,10):
         images = {}
         group = folders[i-9:i+1]
         txt = "dictionary"+str(i)+".txt"
         for folder in group:
-            files = os.listdir("ffhq_images_1024x1024/"+folder) 
-            print(f"Reading images from directory: ffhq_images_1024x1024/{folder}")
+            files = os.listdir("ffhq_images_1024x1024_lab_format/"+folder) 
+            print(f"Reading images from directory: ffhq_images_1024x1024_lab_format/{folder}")
             for file in files:
-                pic = torchvision.io.read_image("ffhq_images_1024x1024/"+folder+"/"+file).cuda()
+                pic = torchvision.io.read_image("ffhq_images_1024x1024_lab_format/"+folder+"/"+file).cuda()
                 score = D(pic[None,:,:,:],c=None).cuda()
                 images[file] = float(score.cpu().numpy()[0][0])
         with open(txt, 'w') as convert_file:
