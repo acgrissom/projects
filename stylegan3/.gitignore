@@ -6,3 +6,5 @@ __pycache__/
 ffhq_images_1024x1024/
 ffhq_images_1024x1024_lab_format/
 dictionary*.txt
+top_least_100_images/least_100/
+top_least_100_images/top_100/

@@ -1,0 +1,2 @@
+# About this folder ("images" folder)
+* This folder contains images for the top and least 100 images ordered by scores given by the discriminator. The "lab" folder within this folder contains images for lab format images, and the "rgb" folder contains images for rgb format images. Within each folder, there is a "score.png" image showing the distribution of scores for all images. 

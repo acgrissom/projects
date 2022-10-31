@@ -25,10 +25,11 @@ resize = torchvision.transforms.Resize((1024,1024))
 
 def main():
     #convert_rbg_to_lab("ffhq_images_1024x1024/*","ffhq_images_1024x1024_lab_format/*")
-    read_images_get_scores()
-    files = ["dictionary9.txt","dictionary19.txt","dictionary29.txt","dictionary39.txt","dictionary49.txt","dictionary59.txt","dictionary69.txt"]
+    #read_images_get_scores()
+    dict_files = glob.glob("parsing_dictionaries/lab/*") 
+    print(dict_files)
     dict_list = []
-    for file in files:
+    for file in dict_files:
         with open(file, 'r') as convert_file:
             dictionary = convert_file.read()
             dict_list.append(json.loads(dictionary))
@@ -40,7 +41,7 @@ def main():
 
     scores = list(complete_dict.values())
     npscores = np.array(scores)
-    np.savetxt("score_for_lab_images.csv",npscores,delimiter=",")
+    np.savetxt("score_for_rgb_images.csv",npscores,delimiter=",")
     print(f"Mean of scores is:{np.mean(npscores)}    Std of scores is:{np.std(npscores)} Median of scores is:{np.median(npscores)}")
 
     plt.figure(figsize=(15,10))
@@ -51,7 +52,7 @@ def main():
 
     files = list(complete_dict.keys())
     show_images(files[0:100],"Least 100")
-    show_images(files[49900:], "Top 100")
+    show_images(files[69900:], "Top 100")
    
     
 def make_subdirectories(root_path):
@@ -70,7 +71,6 @@ def show_images(files, figurename):
     images = []
     for file in files:
         name = glob.glob("ffhq_images_1024x1024_lab_format/*/"+str(file))
-        #print(name)
         image = Image.open(name[0])
         images.append(image)
 
