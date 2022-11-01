@@ -18,6 +18,7 @@ from mpl_toolkits.axes_grid1 import ImageGrid
 import statsmodels.api as sm
 import pylab as py
 import cv2
+import scipy.stats as stats
 
 with open('models/stylegan3-r-ffhq-1024x1024.pkl', 'rb') as f:
     D = pickle.load(f)['D'].cuda()  # torch.nn.Module
@@ -39,20 +40,23 @@ def main():
         complete_dict = complete_dict | one_dict
     complete_dict = dict(sorted(complete_dict.items(), key=lambda item: item[1]))
 
+    files = list(complete_dict.keys())
     scores = list(complete_dict.values())
     npscores = np.array(scores)
-    np.savetxt("score_for_rgb_images.csv",npscores,delimiter=",")
+    np.savetxt("score_for_lab_images.csv",npscores,delimiter=",")
     print(f"Mean of scores is:{np.mean(npscores)}    Std of scores is:{np.std(npscores)} Median of scores is:{np.median(npscores)}")
 
-    plt.figure(figsize=(15,10))
+    print("Correlation for least 100 is:", get_correlation(files[0:100], complete_dict))
+
+    """ plt.figure(figsize=(15,10))
     plt.title("Scores for all 1024x1024 lab images")
     plt.ylabel("score")
     plt.hist(scores, bins=1000)
-    plt.savefig("score.png")
+    plt.savefig("score.png") """
 
-    files = list(complete_dict.keys())
+    """ files = list(complete_dict.keys())
     show_images(files[0:100],"Least 100")
-    show_images(files[69900:], "Top 100")
+    show_images(files[69900:], "Top 100") """
    
     
 def make_subdirectories(root_path):
@@ -66,7 +70,19 @@ def make_subdirectories(root_path):
         path = os.path.join(root_path, items)
         os.makedirs(path)
     
-    
+def get_correlation(files, complete_dict):
+    lab = []
+    scores = []
+    for file in files:
+        name = glob.glob("ffhq_images_1024x1024_lab_format/*/"+str(file))
+        score = complete_dict[file]
+        scores.append(score)
+        image = cv2.imread(name[0])
+        luminance = image[:,:,0]
+        mean = np.mean(np.array(luminance))
+        lab.append(mean)
+    return np.corrcoef(np.array(scores), lab)
+
 def show_images(files, figurename):
     images = []
     for file in files:
