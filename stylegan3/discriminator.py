@@ -77,6 +77,7 @@ def make_subdirectories(root_path):
 def get_correlation(files, complete_dict):
     lab = []
     scores = []
+    index = 0
     for file in files:
         name = glob.glob("ffhq_images_1024x1024_lab_format/*/"+str(file))
         score = complete_dict[file]
@@ -85,6 +86,9 @@ def get_correlation(files, complete_dict):
         luminance = image[:,:,0]
         mean = np.mean(np.array(luminance))
         lab.append(mean)
+        if index % 100 ==0:
+            print(f"working on image {file}")
+        index +=1
 
     dic_df = {"image_id":files,"scores":scores,"luminance":lab}
     df = pd.DataFrame(dic_df)
