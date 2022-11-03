@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torchvision
 import numpy as np
+import pandas as pd
 #import torchvision.io as io
 #import torchvision.transforms as transforms
 from PIL import Image
@@ -41,18 +42,21 @@ def main():
     complete_dict = dict(sorted(complete_dict.items(), key=lambda item: item[1]))
 
     files = list(complete_dict.keys())
+    least_100_files = files[0:100]
+    top_100_files = files[69900:]
     scores = list(complete_dict.values())
     npscores = np.array(scores)
+    plot_normal_quantile(npscores)
     np.savetxt("score_for_lab_images.csv",npscores,delimiter=",")
-    print(f"Mean of scores is:{np.mean(npscores)}    Std of scores is:{np.std(npscores)} Median of scores is:{np.median(npscores)}")
+    print(f"Mean of scores is:{np.mean(npscores)}    \
+        Std of scores is:{np.std(npscores)} Median of scores is:{np.median(npscores)}")
+    print("Correlation for all image is:", get_correlation(files, complete_dict))
 
-    print("Correlation for least 100 is:", get_correlation(files[0:100], complete_dict))
-
-    """ plt.figure(figsize=(15,10))
+    plt.figure(figsize=(15,10))
     plt.title("Scores for all 1024x1024 lab images")
     plt.ylabel("score")
     plt.hist(scores, bins=1000)
-    plt.savefig("score.png") """
+    plt.savefig("score.png")
 
     """ files = list(complete_dict.keys())
     show_images(files[0:100],"Least 100")
@@ -81,7 +85,17 @@ def get_correlation(files, complete_dict):
         luminance = image[:,:,0]
         mean = np.mean(np.array(luminance))
         lab.append(mean)
+
+    dic_df = {"image_id":files,"scores":scores,"luminance":lab}
+    df = pd.DataFrame(dic_df)
+    df.to_csv("LAB_format_images_data.csv")
     return np.corrcoef(np.array(scores), lab)
+
+
+
+def plot_normal_quantile(input):
+    sm.qqplot(input, line="45")
+    plt.savefig("images/normal_qq_plot.png")
 
 def show_images(files, figurename):
     images = []

@@ -10,3 +10,11 @@ discriminator.py has all the functions for using the trained discriminator in st
 included, and modify it as you wish. 
 * stylegan3/torch_utils/ops/grid_sample_gradfix.py line 60 is changed to remove an error. 
 See [Github Issue](https://github.com/NVlabs/stylegan3/issues/188) for more details.
+
+# Results
+1. Correlation between discriminator scores and luminance:   
+
+    | Attempt | #1    | #2    |
+    | :---:   | :---: | :---: |
+    | Seconds | 301   | 283   |
+
