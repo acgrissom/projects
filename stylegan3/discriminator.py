@@ -28,7 +28,7 @@ resize = torchvision.transforms.Resize((1024,1024))
 def main():
     #convert_rbg_to_lab("ffhq_images_1024x1024/*","ffhq_images_1024x1024_lab_format/*")
     #read_images_get_scores()
-    dict_files = glob.glob("parsing_dictionaries/lab/*") 
+    dict_files = glob.glob("parsing_dictionaries/rgb/*") 
     print(dict_files)
     dict_list = []
     for file in dict_files:
@@ -47,16 +47,17 @@ def main():
     scores = list(complete_dict.values())
     npscores = np.array(scores)
     plot_normal_quantile(npscores)
-    np.savetxt("score_for_lab_images.csv",npscores,delimiter=",")
     print(f"Mean of scores is:{np.mean(npscores)}    \
         Std of scores is:{np.std(npscores)} Median of scores is:{np.median(npscores)}")
     print("Correlation for all image is:", get_correlation(files, complete_dict))
 
+    """     
     plt.figure(figsize=(15,10))
     plt.title("Scores for all 1024x1024 lab images")
     plt.ylabel("score")
     plt.hist(scores, bins=1000)
     plt.savefig("score.png")
+     """
 
     """ files = list(complete_dict.keys())
     show_images(files[0:100],"Least 100")
@@ -79,7 +80,7 @@ def get_correlation(files, complete_dict):
     scores = []
     index = 0
     for file in files:
-        name = glob.glob("ffhq_images_1024x1024_lab_format/*/"+str(file))
+        name = glob.glob("ffhq_images_1024x1024/*/"+str(file))
         score = complete_dict[file]
         scores.append(score)
         image = cv2.imread(name[0])
@@ -92,7 +93,7 @@ def get_correlation(files, complete_dict):
 
     dic_df = {"image_id":files,"scores":scores,"luminance":lab}
     df = pd.DataFrame(dic_df)
-    df.to_csv("LAB_format_images_data.csv")
+    df.to_csv("RGB_format_images_data.csv")
     return np.corrcoef(np.array(scores), lab)
 
 
