@@ -20,6 +20,7 @@ import statsmodels.api as sm
 import pylab as py
 import cv2
 import scipy.stats as stats
+from sklearn.linear_model import LinearRegression
 
 with open('models/stylegan3-r-ffhq-1024x1024.pkl', 'rb') as f:
     D = pickle.load(f)['D'].cuda()  # torch.nn.Module
@@ -28,7 +29,25 @@ resize = torchvision.transforms.Resize((1024,1024))
 def main():
     #convert_rbg_to_lab("ffhq_images_1024x1024/*","ffhq_images_1024x1024_lab_format/*")
     #read_images_get_scores()
-    dict_files = glob.glob("parsing_dictionaries/rgb/*") 
+    clf = LinearRegression()
+    df = pd.read_csv("correct_LAB_format_images_data.csv")
+    luminance = df["luminance"].to_numpy()
+    luminance_reshaped = np.array(np.split(luminance, len(luminance)))
+    scores = df["scores_rgb"].to_numpy()
+    scores_reshaped = np.array(np.split(scores, len(scores)))
+    
+    clf.fit(luminance_reshaped,scores_reshaped)
+    predictions = clf.predict(luminance_reshaped)
+    predictions = np.squeeze(predictions)
+    plt.figure(figsize=(10,10))
+    plt.title("scores for images vs luminance")
+    plt.xlabel("Luminance")
+    plt.ylabel("Scores")
+    plt.scatter(luminance, scores)
+    plt.plot(luminance, predictions, c="red",lw=4.0)
+    plt.savefig("images/score_luminance.png")
+    
+    """ dict_files = glob.glob("parsing_dictionaries/rgb/*") 
     print(dict_files)
     dict_list = []
     for file in dict_files:
@@ -49,7 +68,7 @@ def main():
     plot_normal_quantile(npscores)
     print(f"Mean of scores is:{np.mean(npscores)}    \
         Std of scores is:{np.std(npscores)} Median of scores is:{np.median(npscores)}")
-    print("Correlation for all image is:", get_correlation(files, complete_dict))
+    print("Correlation for all image is:", get_correlation(files, complete_dict)) """
 
     """     
     plt.figure(figsize=(15,10))
@@ -74,7 +93,31 @@ def make_subdirectories(root_path):
     for items in paths:
         path = os.path.join(root_path, items)
         os.makedirs(path)
-    
+
+def visualize_score(format):
+    format = format.upper()
+    file = format+"_format_images_data.csv"
+    df = pd.read_csv(file)
+    scores = df["scores"].to_numpy()
+    luminance = df["luminance"].to_numpy()
+    plt.figure(figsize=(10,10))
+    plt.title("scores for "+format+" images vs luminance")
+    plt.xlabel("Luminance")
+    plt.ylabel("Scores")
+    plt.plot(scores, luminance)
+    plt.savefig("images/"+format+".jpg")
+
+def get_correct_df():
+    df1 = pd.read_csv("LAB_format_images_data.csv")
+    df2 = pd.read_csv("RGB_format_images_data.csv")
+    new = pd.merge(df1,df2,how="left",on=["image_id"], indicator=True)
+    new.drop(columns=["Unnamed: 0_x","Unnamed: 0_y","_merge","luminance_y"], inplace=True)
+    new["scores_rgb"] = new["scores_y"]
+    new.drop(columns=["scores_x", "scores_y"], inplace=True)
+    new.rename(columns={"luminance_x":"luminance"}, inplace=True)
+    print(new.head())
+    new.to_csv("correct_LAB_format_images_data.csv")
+
 def get_correlation(files, complete_dict):
     lab = []
     scores = []
@@ -95,7 +138,6 @@ def get_correlation(files, complete_dict):
     df = pd.DataFrame(dic_df)
     df.to_csv("RGB_format_images_data.csv")
     return np.corrcoef(np.array(scores), lab)
-
 
 
 def plot_normal_quantile(input):
