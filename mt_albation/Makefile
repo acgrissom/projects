@@ -39,14 +39,14 @@ seqcopy: genseqcopy.py
                          -o seqcopy_model
 
 
-make corpus.tc.en:
+corpus.tc.en:
 	wget http://data.statmt.org/wmt17/translation-task/preprocessed/de-en/corpus.tc.de.gz
 	wget http://data.statmt.org/wmt17/translation-task/preprocessed/de-en/corpus.tc.en.gz
 	gunzip corpus.tc.de.gz
 	gunzip corpus.tc.en.gz
 	curl http://data.statmt.org/wmt17/translation-task/preprocessed/de-en/dev.tgz | tar xvzf -
 
-make corpus.tc.de:
+corpus.tc.de:
 	wget http://data.statmt.org/wmt17/translation-task/preprocessed/de-en/corpus.tc.de.gz
 	wget http://data.statmt.org/wmt17/translation-task/preprocessed/de-en/corpus.tc.en.gz
 	gunzip corpus.tc.de.gz
@@ -55,40 +55,39 @@ make corpus.tc.de:
 	tar xvzf dev.tgz
 
 
-make bpe.codes: corpus.tc.de
+bpe.codes: corpus.tc.de
 	subword-nmt learn-joint-bpe-and-vocab --input corpus.tc.de corpus.tc.en \
                                     -s 30000 \
                                     -o bpe.codes \
                                     --write-vocabulary bpe.vocab.de bpe.vocab.en
 
 
-make corpus.tc.BPE.de: bpe.codes
+corpus.tc.BPE.de: bpe.codes
 	subword-nmt apply-bpe -c bpe.codes --vocabulary bpe.vocab.de --vocabulary-threshold 50 < corpus.tc.de > corpus.tc.BPE.de
 
-make corpus.tc.BPE.en: bpe.codes
+corpus.tc.BPE.en: bpe.codes
 	subword-nmt apply-bpe -c bpe.codes --vocabulary bpe.vocab.en --vocabulary-threshold 50 < corpus.tc.en > corpus.tc.BPE.en
 
 
-make newstest2016.tc.BPE.de: corpus.tc.BPE.de
+newstest2016.tc.BPE.de: corpus.tc.BPE.de
 	subword-nmt apply-bpe -c bpe.codes --vocabulary bpe.vocab.de --vocabulary-threshold 50 < newstest2016.tc.de > newstest2016.tc.BPE.de
 
-make newstest2016.tc.BPE.en: corpus.tc.BPE.en
+newstest2016.tc.BPE.en: corpus.tc.BPE.en
 	subword-nmt apply-bpe -c bpe.codes --vocabulary bpe.vocab.en --vocabulary-threshold 50 < newstest2016.tc.en > newstest2016.tc.BPE.en
 
-make train_data: newstest2016.tc.BPE.en newstest2016.tc.BPE.de
+train_data: newstest2016.tc.BPE.en newstest2016.tc.BPE.de
 	python -m sockeye.prepare_data \
                         -s corpus.tc.BPE.de \
                         -t corpus.tc.BPE.en \
                         -o train_data \
                         --shared-vocab
 
-make wmt_model: train_data
+wmt_model: train_data
 	python -m sockeye.train -d train_data \
                         -vs newstest2016.tc.BPE.de \
                         -vt newstest2016.tc.BPE.en \
                         --max-seq-len 60 \
                         --decode-and-evaluate 500 \
-                        --use-cpu \
                         -o wmt_model \
                         --shared-vocab \
                         --max-num-epochs 3
