@@ -104,4 +104,5 @@ make clean_data:
 	rm -f corpus*.gz
 	rm -f dev.tgz
 	rm -Rf train_data
-	rm -Tf wmt_model
+	rm -Rf wmt_model
+	rm -RF *.sgm
