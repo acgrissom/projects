@@ -21,6 +21,7 @@ import pylab as py
 import cv2
 import scipy.stats as stats
 from sklearn.linear_model import LinearRegression
+import click
 
 with open('models/stylegan3-r-ffhq-1024x1024.pkl', 'rb') as f:
     D = pickle.load(f)['D'].cuda()  # torch.nn.Module
@@ -184,7 +185,30 @@ def read_images_get_scores():
         with open(txt, 'w') as convert_file:
             convert_file.write(json.dumps(images))
 
-
+def get_average_color():
+    filename = "correct_LAB_format_images_data.csv"
+    try:
+        with open("bottle.py") as f:
+            print(f"Found {filename} in current directory")
+    except FileNotFoundError:
+        print(f'{filename} is not present')
+    df = pd.read_csv(filename)
+    image_ids = df["image_id"]
+    r = []
+    g = []
+    b = []
+    for id in image_ids:
+        file = glob.glob("ffhq_images_1024x1024/*/"+id)[0]
+        image = torchvision.io.read_image(file)
+        image  = image.float()
+        red_mean, green_mean, blue_mean = torch.mean(image,dim=[1,2]).numpy()
+        r.append(red_mean)
+        g.append(green_mean)
+        b.append(blue_mean)
+    df["red_mean"] = r
+    df["green_mean"] = g
+    df["blue_mean"] = b
+    df.to_csv("correct_LAB_format_images_data.csv")
 
 def convert_rbg_to_lab(read_dir, write_dir):
     """

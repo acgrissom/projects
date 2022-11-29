@@ -6,9 +6,10 @@ get_average_color:
 	@activate_env
 	python -c "from regression import get_average_color; get_average_color()"
 
-install_conda:
-	wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-	sh Miniconda3-latest-Linux-x86_64.sh
+miniconda.sh:
+	wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh > miniconda.sh
+	sh miniconda.sh
+	rm miniconda.sh
 
 install_conda_env:
 	conda env create --file environment.yml
