@@ -185,6 +185,7 @@ def read_images_get_scores():
             convert_file.write(json.dumps(images))
 
 
+
 def convert_rbg_to_lab(read_dir, write_dir):
     """
     This is a mutator that converts all images in ffhq_images_1024x1024 folders 
