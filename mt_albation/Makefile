@@ -1,12 +1,12 @@
 anaconda.sh:
 	curl https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh > anaconda.sh
-	sh Anaconda3-2022.10-Linux-x86_64.sh
-	rm Anaconda3-2022.10-Linux-x86_64.sh
+	sh anaconda.sh
+	rm anaconda.sh
 
-make apex:
+apex:
 	git clone https://github.com/NVIDIA/apex
 
-make apex_install: apex
+apex_install: apex
 	cd apex && pip install -v --disable-pip-version-check --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
 
 sockeye:
@@ -92,13 +92,13 @@ wmt_model: train_data
                         --shared-vocab \
                         --max-num-epochs 3
 
-make clean:
+clean:
 	rm -Rf seqcopy_model
 	rm -Rf sockeye
 	rm -Rf apex
 	rm -f anaconda.sh
 
-make clean_data:
+clean_data:
 	rm -Rf data
 	rm -f corpus*.gz
 	rm -f dev.tgz
