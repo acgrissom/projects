@@ -22,9 +22,11 @@ conda_dependencies:
 
 astronaut_rides_horse.png:
 	python stable_diffusion_local.py
+	catimg astronaut_rides_horse.png
 
 network_astronaut_rides_horse.png:
 	python stable_diffusion_network.py
+	catimg network_astronaut_rides_horse.png
 
 clean:
 	rm -f astronaut_rides_horse.png
