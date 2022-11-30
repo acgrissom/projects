@@ -19,4 +19,6 @@ conda_dependencies:
 	pip install flax --upgrade
 
 
+astronaut_rides_horse.png:
+	python stable_diffusion.py
 
