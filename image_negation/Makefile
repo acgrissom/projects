@@ -7,7 +7,7 @@ conda_environment:
 	conda create --name transformers
 
 conda_dependencies:
-	conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+	conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia -y
 	conda install -c conda-forge tensorflow -y
 	conda install -c huggingface -c conda-forge datasets -y
 	conda install -c conda-forge jax -y
@@ -23,7 +23,7 @@ astronaut_rides_horse.png:
 	python stable_diffusion_local.py
 
 network_astronaut_rides_horse.png:
-	python stable_diffusion.py
+	python stable_diffusion_network.py
 
 clean:
 	rm -f astronaut_rides_horse.png
