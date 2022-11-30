@@ -1,6 +1,5 @@
 anaconda.sh:
-	curl https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh > \
-anaconda.sh
+	curl https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh > anaconda.sh
 	sh anaconda.sh
 	rm anaconda.sh
 
@@ -8,10 +7,11 @@ conda_environment:
 	conda create --name transformers
 
 conda_dependencies:
-	conda install -c pytorch pytorch -y
+	conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
 	conda install -c conda-forge tensorflow -y
 	conda install -c huggingface -c conda-forge datasets -y
 	conda install -c conda-forge jax -y
+	conda install -c conda-forge ftfy -y
 	pip install --upgrade diffusers transformers scipy --upgrade
 	pip install accelerate --upgrade
 	pip install spacy --upgrade
@@ -22,3 +22,6 @@ conda_dependencies:
 astronaut_rides_horse.png:
 	python stable_diffusion.py
 
+clean:
+	rm -f astronaut_rides_horse.png
+	rm -f anaconda.sh
