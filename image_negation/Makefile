@@ -15,6 +15,7 @@ conda_dependencies:
 	pip install --upgrade diffusers transformers scipy --upgrade
 	pip install accelerate --upgrade
 	pip install spacy --upgrade
+	pip install ftfy --upgrade
 	pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 	pip install flax --upgrade
 
