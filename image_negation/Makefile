@@ -20,6 +20,9 @@ conda_dependencies:
 
 
 astronaut_rides_horse.png:
+	python stable_diffusion_local.py
+
+network_astronaut_rides_horse.png:
 	python stable_diffusion.py
 
 clean:
