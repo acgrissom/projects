@@ -3,10 +3,6 @@ anaconda.sh:
 	sh anaconda.sh
 	rm anaconda.sh
 
-conda_environment:
-	conda create --name sockeye
-	conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia -y
-
 
 apex:
 	git clone https://github.com/NVIDIA/apex
@@ -14,12 +10,13 @@ apex:
 apex_install: apex
 	cd apex && pip install -v --disable-pip-version-check --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
 
+conda_environment:
+	conda create -n sockeye python=3.8	
 sockeye:
-	conda create -n sockeye python=3.8
-	source activate sockeye
 	pip install sockeye --no-deps
 	pip install tensorboard
 	pip install subword_nmt
+	pip install packaging
 
 sockeye_optional:
 	git clone https://github.com/awslabs/sockeye
