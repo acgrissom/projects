@@ -6,10 +6,12 @@ import glob
 import torch
 import click
 import os
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
 
 def main():
-    plot_regression()
+    do_multiple_regression()
     
 
 @click.command()
@@ -23,7 +25,15 @@ def plot_regression(x,y):
                line_kws={"color":"red"}, scatter_kws={'alpha':0.3, "color":"green"})
     plt.savefig("regression.svg", format="svg")
 
-def do_regression():
+def do_multiple_regression():
+    df = pd.read_csv("correct_LAB_format_images_data.csv")
+    X = df[["scores_rgb","red_mean","green_mean","blue_mean"]].to_numpy()
+    y = df["luminance"].to_numpy()
+    reg = LinearRegression().fit(X, y)
+    print(f"The weights are:{reg.coef_}, and the intercept is:{reg.intercept_}")
+    print(f"R^2 is {reg.score(X, y)}")
+
+def plot_colored_hist():
     pass
 
 if __name__ == "__main__":
