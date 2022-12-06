@@ -3,6 +3,11 @@ anaconda.sh:
 	sh anaconda.sh
 	rm anaconda.sh
 
+conda_environment:
+	conda create --name sockeye
+	conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia -y
+
+
 apex:
 	git clone https://github.com/NVIDIA/apex
 
