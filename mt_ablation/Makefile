@@ -46,7 +46,7 @@ corpus.tc.en:
 	wget http://data.statmt.org/wmt17/translation-task/preprocessed/de-en/corpus.tc.en.gz
 	gunzip corpus.tc.de.gz
 	gunzip corpus.tc.en.gz
-	https://data.statmt.org/wmt17/translation-task/preprocessed/de-en/dev.tgz | tar xvzf -
+	curl https://data.statmt.org/wmt17/translation-task/preprocessed/de-en/dev.tgz | tar xvzf -
 
 corpus.tc.de:
 	wget http://data.statmt.org/wmt17/translation-task/preprocessed/de-en/corpus.tc.de.gz
