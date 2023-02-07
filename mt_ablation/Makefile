@@ -107,3 +107,52 @@ clean_data:
 	rm -Rf train_data
 	rm -Rf wmt_model
 	rm -RF *.sgm
+
+ko_corpus:
+	curl -JLO https://github.com/jungyeul/korean-parallel-corpora/raw/master/korean-english-news-v1/korean-english-park.train.tar.gz
+	curl -JLO https://github.com/jungyeul/korean-parallel-corpora/raw/master/korean-english-news-v1/korean-english-park.dev.tar.gz 
+	curl -JLO https://github.com/jungyeul/korean-parallel-corpora/raw/master/korean-english-news-v1/korean-english-park.test.tar.gz
+
+	tar xvzf korean-english-park.train.tar.gz
+	tar xvzf korean-english-park.test.tar.gz
+	tar xvzf korean-english-park.dev.tar.gz
+
+ko_bpe_vocab: ko_corpus
+	rm bpe*
+	python -m learn_joint_bpe_and_vocab --input korean-english-park.train.ko korean-english-park.train.en \
+                                    -s 30000 \
+                                    -o bpe.codes \
+                                    --write-vocabulary bpe.vocab.ko bpe.vocab.en
+ko-BPE: ko_bpe_vocab
+	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.ko --vocabulary-threshold 50 < korean-english-park.train.ko > korean-english-park.train.BPE.ko
+	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.en --vocabulary-threshold 50 < korean-english-park.train.en > korean-english-park.train.BPE.en
+
+	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.ko --vocabulary-threshold 50 < korean-english-park.dev.ko > korean-english-park.dev.BPE.ko
+	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.en --vocabulary-threshold 50 < korean-english-park.dev.en > korean-english-park.dev.BPE.en
+
+	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.ko --vocabulary-threshold 50 < korean-english-park.test.ko > korean-english-park.test.BPE.ko
+	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.en --vocabulary-threshold 50 < korean-english-park.test.en > korean-english-park.test.BPE.en
+
+ko_prepare_data: ko-BPE
+	python -m sockeye.prepare_data \
+                        -s korean-english-park.train.BPE.ko \
+                        -t korean-english-park.train.BPE.en \
+                        -o train_data \
+                        --shared-vocab
+
+ko_train_data: ko_prepare_data
+	python -m sockeye.train -d train_data \
+		--validation-source korean-english-park.dev.BPE.ko \
+		--validation-target korean-english-park.dev.BPE.en \
+		--output ko_en_model --num-layers 6 \
+		--transformer-model-size 1024 --transformer-attention-heads 16 \
+		--transformer-feed-forward-num-hidden 4096 --amp --batch-type max-word \
+		--batch-size 5000 --update-interval 80 --checkpoint-interval 500 \
+		--max-num-checkpoint-not-improved 20 --optimizer-betas 0.9:0.98 \
+		--initial-learning-rate 0.06325 \
+		--learning-rate-scheduler-type inv-sqrt-decay --learning-rate-warmup 4000 \
+		--seed 1
+
+ko_clean:
+	rm korean-english-park*
+	rm bpe*
