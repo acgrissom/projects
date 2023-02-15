@@ -1,12 +1,11 @@
 OUT_DIR = results/figures
 
 mac_packages:
-	brew install inkscape
+	brew install inkscape catimg imagemagick
 
 linux_packages:
-	apt install inkscape
-	apt install r-base
-	apt isntall caca-utils
+	apt install inkscape r-base caca-utils
+
 r_packages:
 	Rscript scripts/install_r_prereqs.R
 
