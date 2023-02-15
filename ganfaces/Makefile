@@ -1,10 +1,10 @@
 OUT_DIR = results/figures
 
 mac_packages:
-	brew install imagemagick
+	brew install inkscape
 
 linux_packages:
-	apt install imagemagick
+	apt install inkscape
 	apt install r-base
 	apt isntall caca-utils
 r_packages:
@@ -13,9 +13,10 @@ r_packages:
 
 results/figures/atypical_mens_face_dist.pdf:
 	Rscript scripts/AtypicalFacePlotCode.R
-	convert results/figures/atypical_mens_face_dist.svg atypical_mens_face_dist.pdf
-	convert results/figures/atypical_mens_faces_raincloud.svg results/figures/atypical_mens_faces_raincloud.pdf
-	convert results/figures/atypical_mens_face_dist.svg | lpr
+	inkscape results/figures/atypical_mens_face_dist.svg --export-type=pdf --export-filename==atypical_mens_face_dist.pdf
+	inkscape results/figures/atypical_mens_face_raincloud.svg --export-type=pdf --export-filename=results/figures/atypical_mens_face_raincloud.pdf
+	convert results/figures/atypical_mens_face_dist.svg results/figures/atypical_mens_face_dist.jpg
+	catimg results/figures/atypical_mens_face_dist.jpg
 
 
 

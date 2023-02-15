@@ -3,7 +3,7 @@ lib<-c("lme4","readr","tidyr","effects","ggplot2","psych","MASS",
        "pastecs","sjstats","car","readxl","ggdist", "svglite")
 lapply(lib,require,character.only=TRUE)
 
-gan_hair<-read.csv("../data/AtypicalFaceData.csv")
+gan_hair<-read.csv("data/AtypicalFaceData.csv")
 
 mean_gan_hair<- summarySE(data=gan_hair, measurevar = "discriminator_score",
                           groupvars = c("race","hair_length"),
@@ -23,7 +23,8 @@ plot_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
 
 
 plot_hair
-ggsave("../figures/AtypicalFaceScoreDistribution.svg", plot=plot_hair)
+ggsave("results/figures/atypical_mens_face_dist.svg", plot=plot_hair)
+ggsave("results/figures/atypical_mens_face_dist.jpg", plot=plot_hair)
 
 plot_hair_raincloud <- ggplot(gan_hair, aes(hair_length, discriminator_score)) + 
   ggdist::stat_halfeye(adjust = .5, width = .3, .width = c(0.5, 1), justification = -.3) + 
@@ -32,8 +33,8 @@ plot_hair_raincloud <- ggplot(gan_hair, aes(hair_length, discriminator_score)) +
   facet_wrap(~race)
 
 plot_hair_raincloud
-ggsave("../figures/AtypicalFaceScoreRaincloud.svg", plot=plot_hair_raincloud)
-
+ggsave("results/figures/atypical_mens_face_raincloud.svg", plot=plot_hair_raincloud)
+ggsave("results/figures/atypical_mens_face_raincloud.jpg", plot=plot_hair_raincloud)
 
 ###### predicting score ~ race #######
 
