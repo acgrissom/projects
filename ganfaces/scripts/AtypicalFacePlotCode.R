@@ -11,7 +11,7 @@ mean_gan_hair<- summarySE(data=gan_hair, measurevar = "discriminator_score",
                           
 plot_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
   geom_density(alpha = 0.25)+
-  facet_wrap(~race)+
+  facet_grid(race ~ .)+
   theme_few() +
   theme(axis.text=element_text(size=12),
         axis.title=element_text(size=12),
