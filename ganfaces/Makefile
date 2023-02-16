@@ -10,12 +10,14 @@ r_packages:
 	Rscript scripts/install_r_prereqs.R
 
 
-results/figures/atypical_mens_face_dist.pdf:
+results/figures/atypical_mens_face_dist.pdf: scripts/AtypicalFacePlotCode.R
 	Rscript scripts/AtypicalFacePlotCode.R
-	inkscape results/figures/atypical_mens_face_dist.svg --export-type=pdf --export-filename==atypical_mens_face_dist.pdf
+	inkscape results/figures/atypical_mens_face_dist.svg --export-type=pdf --export-filename=results/figures/atypical_mens_face_dist.pdf
+	inkscape results/figures/atypical_mens_face_hist.svg --export-type=pdf --export-filename=results/figures/atypical_mens_face_hist.pdf
 	inkscape results/figures/atypical_mens_face_raincloud.svg --export-type=pdf --export-filename=results/figures/atypical_mens_face_raincloud.pdf
 	convert results/figures/atypical_mens_face_dist.svg results/figures/atypical_mens_face_dist.jpg
 	catimg results/figures/atypical_mens_face_dist.jpg
 
 
-
+clean:
+	rm results/figures/*.*

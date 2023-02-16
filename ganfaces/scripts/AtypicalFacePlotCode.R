@@ -11,20 +11,44 @@ mean_gan_hair<- summarySE(data=gan_hair, measurevar = "discriminator_score",
                           
 plot_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
   geom_density(alpha = 0.25)+
-  facet_grid(race ~ .)+
-  theme_few() +
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=12),
+    facet_grid(race ~ .) +
+  theme_minimal() +
+    theme(strip.text.y = element_text(size = 14),
+        legend.position="bottom",
+        axis.text=element_text(size=12),
+        axis.title=element_text(size=14),
         legend.title=element_text(size=12),
+        #legend.title=element_blank(),
         legend.text=element_text(size=12)) +
-  scale_color_economist() +
-  labs(y = "Density", x = "Discriminator Score",
-       fill = "Stimulus Race") 
+        scale_color_colorblind() +
+  labs(y = "Density", x = "Score",
+       fill = "Hair") 
 
 
 plot_hair
 ggsave("results/figures/atypical_mens_face_dist.svg", plot=plot_hair)
 ggsave("results/figures/atypical_mens_face_dist.jpg", plot=plot_hair)
+
+
+plot_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
+  geom_histogram(alpha = 0.5)+
+  facet_grid(race ~ .)+
+  theme_minimal() +
+    theme(strip.text.y = element_text(size = 14),
+          legend.position = "bottom",
+          axis.text=element_text(size=12),
+        axis.title=element_text(size=14),
+        legend.title=element_text(size=12),
+        legend.text=element_text(size=12)) +
+        scale_color_colorblind() +
+  labs(y = "Count", x = "Score",
+       fill = "Hair") 
+
+
+plot_hair
+ggsave("results/figures/atypical_mens_face_hist.svg", plot=plot_hair)
+ggsave("results/figures/atypical_mens_face_hist.jpg", plot=plot_hair)
+
 
 plot_hair_raincloud <- ggplot(gan_hair, aes(hair_length, discriminator_score)) + 
   ggdist::stat_halfeye(adjust = .5, width = .3, .width = c(0.5, 1), justification = -.3) + 
