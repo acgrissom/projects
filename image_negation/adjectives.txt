@@ -1,0 +1,15 @@
+blue
+red
+green
+yellow
+pink
+purple
+black
+brown
+white
+neon pink
+magenta
+teal
+cyan
+orange 
+gray
