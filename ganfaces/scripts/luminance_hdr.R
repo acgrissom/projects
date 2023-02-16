@@ -20,3 +20,12 @@ p_hdr_points <- ggplot(data, aes(x=luminance, y=scores_rgb, xlab="Luminance", yl
 #p_points + p_hdr_points
 ggsave("results/figures/luminance_hdr.svg")
 ggsave("results/figures/luminance_hdr.jpg")
+
+luminance_dists <- ggplot(data, aes(x=luminance)) +
+    xlab("Luminance") +  
+    geom_density() + theme(legend.position = "bottom") +
+    geom_hdr_rug()
+
+ggsave("results/figures/luminance_dist.svg")
+ggsave("results/figures/luminance_dist.jpg")
+

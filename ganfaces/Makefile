@@ -12,6 +12,8 @@ r_packages:
 results/figures/luminance_hdr.pdf: scripts/luminance_hdr.R
 	Rscript scripts/luminance_hdr.R
 	inkscape results/figures/luminance_hdr.svg --export-type=pdf --export-filename=results/figures/luminance_hdr.pdf
+	Rscript scripts/luminance_dist.R
+	inkscape results/figures/luminance_dist.svg --export-type=pdf --export-filename=results/figures/luminance_dist.pdf
 	catimg results/figures/luminance_hdr.jpg
 
 
