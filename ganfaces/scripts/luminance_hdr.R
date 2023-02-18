@@ -7,7 +7,7 @@ x2 = red_mean
 x3 = green_mean
 x4 = blue_mean
 y = scores_rgb
-theme_set(theme_minimal())
+#theme_set(theme_minimal())
 p_points <- ggplot(data, aes(data, x=luminance, y=scores_rgb)) +
     xlab("Luminance") + ylab("Score") +   labs(fill='HDR') +
     geom_point() + theme(legend.position = "bottom", legend.title = element_text("HDR")) 
