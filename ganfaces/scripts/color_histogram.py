@@ -20,8 +20,16 @@ def append_hex_colors(df):
     df['color_mean'] = hex_list
 
 def plot_scatter(df) -> tuple:
-    return plt.scatter(df.luminance, df.scores_rgb, c=df.color_mean, alpha=0.5, s=0.7)
+    plot = plt.figure()
+    plt.style.use('ggplot')
+    plt.scatter(df.luminance, df.scores_rgb, c=df.color_mean, alpha=0.6)
+    plt.xlabel("Luminance", fontsize=10)  
+    plt.ylabel("Score", fontsize=10)
 
+    plt.savefig(OUT_DIR + 'training_color_scatter.svg')
+    plt.savefig(OUT_DIR + 'training_color_scatter.jpg')
+    plt.savefig(OUT_DIR + 'training_color_scatter.png', dpi=100)
+    return plot
 
 
 
@@ -70,10 +78,9 @@ def find_average_color_by_bin(df, num_bins) -> list:
     bin_colors = list()
     labels = range(num_bins)
     df['score_bin'] = pd.cut(df['scores_rgb'], bins=num_bins, labels=labels)
-    #print(df.head())
+
     for bin_num in labels:
         current_bin = df.loc[df['score_bin'] == bin_num]
-        #print(current_bin.head())
         bin_red = round(current_bin['red_mean'].mean())
         bin_green = round(current_bin['green_mean'].mean())
         bin_blue = round(current_bin['blue_mean'].mean())
@@ -90,15 +97,15 @@ def plot_histogram_bin_by_score(df, num_bins=6):
     bin_colors  = find_average_color_by_bin(df, num_bins)
     plt.figure(figsize=(3.5,3.5))
     plt.tick_params(labelleft=False, left=False)
-    plt.xticks(fontsize=8)
+    plt.xticks(fontsize=10)
     plot = plt.hist(df['scores_rgb'], bins=num_bins, label=None, log=True)
     (n, bins, patches) = plot
     print(bin_colors)
     for i in range(len(bin_colors)):
         patches[i].set_color(bin_colors[i])
 
-    plt.xlabel("Score", fontsize=8)  
-    plt.ylabel("Count", fontsize=8)
+    plt.xlabel("Frequency (log)", fontsize=10)  
+    plt.ylabel("Count", fontsize=10)
     #plt.bar(range(num_bins), [5]*num_bins, color=bin_colors)
     #plt.legend(loc="lower left")
     #plt.legend(labelcolor='black')
@@ -106,20 +113,25 @@ def plot_histogram_bin_by_score(df, num_bins=6):
                  
     plt.savefig(OUT_DIR + 'training_color_histogram_logscale.svg')
     plt.savefig(OUT_DIR + 'training_color_histogram_logscale.jpg')
+    
 
 def seaborn_plot_histogram_bin_by_score(df, num_bins=6):
-    bin_colors  = find_average_color_by_bin(df, num_bins)
     plt.style.use('ggplot')
+
     #plt.figure(figsize=(3.5,3.5))
-    plt.tick_params(labelleft=False, left=False)
-    #plt.xticks(fontsize=8)
+    plt.figure()
+    bin_colors  = find_average_color_by_bin(df, num_bins)
     plot = sns.histplot(df['scores_rgb'], bins=num_bins, log_scale=(False,True))
      # print(bin_colors)
     for i in range(len(bin_colors)):
         plot.patches[i].set_color(bin_colors[i])
+    
+    plt.xticks(fontsize=10)
+    plt.tick_params(labelleft=False, left=False)
+    plt.xlabel("Score", fontsize=10) 
+    plt.ylabel("Frequency (log)", fontsize=10)
 
-    # plt.xlabel("Score", fontsize=8)  
-    # plt.ylabel("Count", fontsize=8)
+
     #plt.bar(range(num_bins), [5]*num_bins, color=bin_colors)
     #plt.legend(loc="lower left")
     #plt.legend(labelcolor='black')
@@ -134,9 +146,10 @@ if __name__ == "__main__":
     NUM_BINS = 20
     df = load_data()
     append_hex_colors(df)
-    #plot_histogram_bin_by_color(df, num_bins=6):
+    #plot_histogram_bin_by_color(df, num_bins=NUM_BINS):  unfinished
+    plot_scatter(df)
     seaborn_plot_histogram_bin_by_score(df, num_bins=NUM_BINS)
-    #plot_scatter(df)
+
     #plt.show()
     
 
