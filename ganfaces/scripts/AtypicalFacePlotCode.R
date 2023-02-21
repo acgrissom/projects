@@ -12,7 +12,7 @@ mean_gan_hair<- summarySE(data=gan_hair, measurevar = "discriminator_score",
 race_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
     geom_density(alpha = 0.25)+
     facet_grid(race ~ .) +
-    theme_minimal() +
+    #theme_minimal() +
     theme(strip.text.y = element_text(size = 14),
           legend.position="bottom",
           axis.text=element_text(size=12),
@@ -34,7 +34,7 @@ ggsave("results/figures/atypical_mens_face_dist.jpg", plot=race_hair)
 
 plot_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
     geom_density(alpha = 0.25) +
-    theme_minimal() +
+    #theme_minimal() +
     theme(strip.text.y = element_text(size = 14),
           legend.position="bottom",
           axis.text=element_text(size=12),
@@ -56,7 +56,7 @@ ggsave("results/figures/atypical_mens_face_dist_aggregate.jpg", plot=plot_hair)
 plot_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
   geom_histogram(alpha = 0.5)+
   facet_grid(race ~ .)+
-  theme_minimal() +
+  #theme_minimal() +
     theme(strip.text.y = element_text(size = 14),
           legend.position = "bottom",
           axis.text=element_text(size=12),
@@ -76,7 +76,7 @@ ggsave("results/figures/atypical_mens_face_hist.jpg", plot=plot_hair)
 
 plot_race<- ggplot(gan_hair, aes(x=discriminator_score, fill = race)) +
     geom_density(alpha = 0.25) +
-    theme_minimal() +
+    #theme_minimal() +
     theme(strip.text.y = element_text(size = 14),
           legend.position="bottom",
           axis.text=element_text(size=12),
