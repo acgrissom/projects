@@ -31,6 +31,7 @@ resize = torchvision.transforms.Resize((1024,1024))
 def main():
     #convert_rbg_to_ciexyz("ffhq_images_1024x1024/*","ffhq_images_1024x1024_lab_format/*")
     #read_images_get_scores()
+    
     #get_luminance()
 
     
@@ -149,8 +150,11 @@ def get_luminance():
     image_ids = df["image_id"]
     lab = []
     for index, id in enumerate(image_ids):
-        file = glob.glob("ffhq_images_1024x1024_lab_format/*/"+id)
+        file = glob.glob("ffhq_images_1024x1024/*/"+id)
         image = cv2.imread(file[0])
+        image = image.astype("float32")
+        image = image/255.0
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2XYZ)
         luminance = image[:,:,1]
         mean = np.mean(np.array(luminance))
         lab.append(mean)
@@ -158,8 +162,9 @@ def get_luminance():
             print(f"working on image {file}")
     dictionary = {"luminance":lab}
     temp = pd.DataFrame(dictionary)
-    temp.to_csv("luminance")
-    df["image_id"]=lab
+    temp.to_csv("luminance.csv")
+    df["normalized_luminance"]=lab
+    df.to_csv("correct_LAB_format_images_data.csv")
         
     
 def plot_normal_quantile(input):
