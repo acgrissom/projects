@@ -32,6 +32,11 @@ results/figures/luminance_hdr.pdf: scripts/luminance_hdr.R
 	catimg results/figures/luminance_hdr.jpg
 
 
+results/figures/luminance_dist.pdf: scripts/luminance_hdr.pdf
+	inkscape results/figures/luminance_dist.svg --export-type=pdf --export-filename=results/figures/luminance_dist.pdf
+	catimg results/figures/luminance_dist.jpg
+
+
 results/figures/atypical_mens_face_dist.pdf: scripts/AtypicalFacePlotCode.R
 	mkdir -p results/figures
 	Rscript scripts/AtypicalFacePlotCode.R
@@ -43,7 +48,7 @@ results/figures/atypical_mens_face_dist.pdf: scripts/AtypicalFacePlotCode.R
 	catimg results/figures/atypical_mens_face_dist.jpg
 
 
-results/figures: results/figures/luminance_hdr.pdf results/figures/atypical_mens_face_dist.pdf results/figures/training_color_histogram_logscale.pdf results/figures/training_color_scatter.png scripts/color_histogram.py
+results/figures: results/figures/luminance_hdr.pdf results/figures/atypical_mens_face_dist.pdf results/figures/training_color_histogram_logscale.pdf results/figures/training_color_scatter.png scripts/color_histogram.py results/figures/luminance_hdr.pdf
 
 git_update:
 	git add scripts/*.R scripts/*.py
