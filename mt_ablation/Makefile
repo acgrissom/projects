@@ -108,6 +108,7 @@ clean_data:
 	rm -Rf wmt_model
 	rm -RF *.sgm
 
+# this corpus is quite small and does not produce good results. The new dataset is downloaded.
 ko_corpus:
 	curl -JLO https://github.com/jungyeul/korean-parallel-corpora/raw/master/korean-english-news-v1/korean-english-park.train.tar.gz
 	curl -JLO https://github.com/jungyeul/korean-parallel-corpora/raw/master/korean-english-news-v1/korean-english-park.dev.tar.gz 
@@ -117,42 +118,68 @@ ko_corpus:
 	tar xvzf korean-english-park.test.tar.gz
 	tar xvzf korean-english-park.dev.tar.gz
 
-ko_bpe_vocab: ko_corpus
-	rm bpe*
-	python -m learn_joint_bpe_and_vocab --input korean-english-park.train.ko korean-english-park.train.en \
-                                    -s 30000 \
-                                    -o bpe.codes \
+ko_bpe_vocab:
+	subword-nmt learn-joint-bpe-and-vocab --input korean-english-park.train.ko korean-english-park.train.en \
+                                    -s 32000 \
+                                    -o bpe_ko.codes \
                                     --write-vocabulary bpe.vocab.ko bpe.vocab.en
-ko-BPE: ko_bpe_vocab
-	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.ko --vocabulary-threshold 50 < korean-english-park.train.ko > korean-english-park.train.BPE.ko
-	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.en --vocabulary-threshold 50 < korean-english-park.train.en > korean-english-park.train.BPE.en
+ko-BPE:
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.ko <  ko-en-corpus.train.ko >  ko-en-corpus.train.BPE.ko
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.en <  ko-en-corpus.train.en >  ko-en-corpus.train.BPE.en
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.ko <  ko-en-corpus.val.ko >  ko-en-corpus.val.BPE.ko
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.en <  ko-en-corpus.val.en >  ko-en-corpus.val.BPE.en
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.ko <  ko-en-corpus.test.ko >  ko-en-corpus.test.BPE.ko
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.en <  ko-en-corpus.test.en >  ko-en-corpus.test.BPE.en
 
-	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.ko --vocabulary-threshold 50 < korean-english-park.dev.ko > korean-english-park.dev.BPE.ko
-	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.en --vocabulary-threshold 50 < korean-english-park.dev.en > korean-english-park.dev.BPE.en
+ko_morpheme:
+	python morpheme.py ko-en-corpus.train.ko ko-en-corpus.train.morph.ko
+	python morpheme.py ko-en-corpus.test.ko ko-en-corpus.test.morph.ko
+	python morpheme.py ko-en-corpus.val.ko ko-en-corpus.val.morph.ko
 
-	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.ko --vocabulary-threshold 50 < korean-english-park.test.ko > korean-english-park.test.BPE.ko
-	python -m apply_bpe -c bpe.codes --vocabulary bpe.vocab.en --vocabulary-threshold 50 < korean-english-park.test.en > korean-english-park.test.BPE.en
 
-ko_prepare_data: ko-BPE
+ko_prepare_data:
 	python -m sockeye.prepare_data \
-                        -s korean-english-park.train.BPE.ko \
-                        -t korean-english-park.train.BPE.en \
-                        -o train_data \
-                        --shared-vocab
+                    	-s ko-en-corpus.train.BPE.ko \
+                    	-t ko-en-corpus.train.BPE.en \
+                    	--shared-vocab --word-min-count 2 \
+                    	--pad-vocab-to-multiple-of 8 \
+                    	--max-seq-len 95 \
+                    	--num-samples-per-shard 10000000 \
+                    	-o ko_prepare_data
 
-ko_train_data: ko_prepare_data
-	python -m sockeye.train -d train_data \
-		--validation-source korean-english-park.dev.BPE.ko \
-		--validation-target korean-english-park.dev.BPE.en \
-		--output ko_en_model --num-layers 6 \
-		--transformer-model-size 1024 --transformer-attention-heads 16 \
-		--transformer-feed-forward-num-hidden 4096 --amp --batch-type max-word \
-		--batch-size 5000 --update-interval 80 --checkpoint-interval 500 \
-		--max-num-checkpoint-not-improved 20 --optimizer-betas 0.9:0.98 \
-		--initial-learning-rate 0.06325 \
-		--learning-rate-scheduler-type inv-sqrt-decay --learning-rate-warmup 4000 \
-		--seed 1
+ko_train_data:
+	python -m sockeye.train -d ko_prepare_data \
+            	--validation-source  ko-en-corpus.val.BPE.ko \
+            	--validation-target ko-en-corpus.val.BPE.en \
+            	--output ko_en_model --num-layers 6 \
+            	--transformer-model-size 1024 --transformer-attention-heads 16 \
+            	--transformer-feed-forward-num-hidden 4096 --amp --batch-type max-word \
+            	--batch-size 5000 --update-interval 80 --checkpoint-interval 500 \
+            	--max-num-checkpoint-not-improved 20 --optimizer-betas 0.9:0.98 \
+            	--initial-learning-rate 0.06325 \
+            	--learning-rate-scheduler-type inv-sqrt-decay --learning-rate-warmup 4000 \
+            	--seed 1
+
+ko_translate:
+	python -m sockeye.translate \
+		--input ko-en-corpus.test.BPE.ko \
+		--output out.bpe \
+		--model ko_en_model \
+		--dtype float16 \
+		--beam-size 5 \
+		--batch-size 64
+
+	echo "\n" >> results.txt
+	date >> results.txt
+	sed -re 's/(@@ |@@$ )//g' <out.bpe >out.tok
+	sacrebleu ko-en-corpus.test.en -tok none -i out.tok >> results.txt
+
 
 ko_clean:
-	rm korean-english-park*
-	rm bpe*
+	mv ko_en_model models/
+	mv results.txt models/
+	rm out*
+	rm_bpe*
+	rm -r ko_prepare_data
+
+
