@@ -33,6 +33,7 @@ def main():
     #read_images_get_scores()
     
     #get_luminance()
+    
 
     
     """ clf = LinearRegression()
