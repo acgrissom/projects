@@ -33,9 +33,14 @@ def main():
     #read_images_get_scores()
     
     #get_luminance()
+    df = pd.read_csv("correct_LAB_format_images_data.csv",index_col=False)
+    df2 = pd.read_csv("outputs.csv", index_col=False)
+    columns = ['race', 'race4', 'gender', 'age', 'race_scores_fair',
+       'race_scores_fair_4', 'gender_scores_fair', 'age_scores_fair']
+    for name in columns:
+        df[name]=df2[name]
     
-
-    
+    df.to_csv("correct_LAB_format_images_data.csv",index=False)
     """ clf = LinearRegression()
     df = pd.read_csv("correct_LAB_format_images_data.csv")
     luminance = df["luminance"].to_numpy()

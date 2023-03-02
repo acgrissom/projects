@@ -222,9 +222,9 @@ def evaluate(cp='model_final_diss.pth'):
     df["skin_nose_luminance"]=luminance4
     
     df["skin_nose_eyes_red_mean"]=rmean5
-    df["skin_nose_eyes_rgreen_mean"]=gmean5
-    df["skin_nose_eyes_rblue_mean"]=bmean5
-    df["skin_nose_eyes_rluminance"]=luminance5
+    df["skin_nose_eyes_green_mean"]=gmean5
+    df["skin_nose_eyes_blue_mean"]=bmean5
+    df["skin_nose_eyes_luminance"]=luminance5
     
     df.to_csv("correct_LAB_format_images_data.csv",index=False)
     
