@@ -33,14 +33,7 @@ def main():
     #read_images_get_scores()
     
     #get_luminance()
-    df = pd.read_csv("correct_LAB_format_images_data.csv",index_col=False)
-    df2 = pd.read_csv("outputs.csv", index_col=False)
-    columns = ['race', 'race4', 'gender', 'age', 'race_scores_fair',
-       'race_scores_fair_4', 'gender_scores_fair', 'age_scores_fair']
-    for name in columns:
-        df[name]=df2[name]
-    
-    df.to_csv("correct_LAB_format_images_data.csv",index=False)
+    get_data_botton100_top100()
     """ clf = LinearRegression()
     df = pd.read_csv("correct_LAB_format_images_data.csv")
     luminance = df["luminance"].to_numpy()
@@ -271,8 +264,47 @@ def convert_rbg_to_ciexyz(read_dir, write_dir):
             LAB_image = cv2.cvtColor(img, cv2.COLOR_RGB2XYZ)
             cv2.imwrite(file_name,LAB_image)
 
-# bad generated images in out directory: 5195, 5196, 5197, 5198, 5200, 5201, 
-
+def get_data_botton100_top100():
+    top = glob.glob("top_least_100_images/top_100/rgb/*")
+    bottom = glob.glob("top_least_100_images/least_100/rgb/*")
+    df = pd.read_csv("correct_LAB_format_images_data.csv",index_col=False)
+    new_df = pd.DataFrame()
+    image_ids = []
+    scores = []
+    rmean = []
+    gmean = []
+    bmean = []
+    luminance = []
+    for bottom_image, top_image in zip(bottom,top):
+        names1 = bottom_image.split("/")
+        name1 = names1[len(names1)-1].strip()
+        names2 = top_image.split("/")
+        name2 = names2[len(names2)-1].strip()
+        
+        new_df = df.loc[(df["image_id"]==name1)|(df["image_id"]==name2)][["image_id","scores_rgb","red_mean","green_mean","blue_mean","luminance"]]
+        series1 = new_df.iloc[0]
+        series2 = new_df.iloc[1]
+        
+        image_ids.append(series1["image_id"])
+        image_ids.append(series2["image_id"])
+        
+        scores.append(series1["scores_rgb"])
+        scores.append(series2["scores_rgb"])
+        
+        rmean.append(series1["red_mean"])
+        rmean.append(series2["red_mean"])
+        
+        gmean.append(series1["green_mean"])
+        gmean.append(series2["green_mean"])
+        
+        bmean.append(series1["blue_mean"])
+        bmean.append(series2["blue_mean"])
+        
+        luminance.append(series1["luminance"])
+        luminance.append(series2["luminance"])
+    dictionary = {"discriminator_score":scores,"image":image_ids,"red_mean":rmean,"green_mean":gmean,"blue_mean":bmean,"luminance":luminance}
+    result = pd.DataFrame(dictionary)
+    result.to_csv("bottom_top_100_data.csv",index=False)
 
 if __name__=="__main__":
     main()
