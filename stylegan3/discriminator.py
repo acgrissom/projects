@@ -33,7 +33,9 @@ def main():
     #read_images_get_scores()
     
     #get_luminance()
-    get_data_botton100_top100()
+    
+        
+    
     """ clf = LinearRegression()
     df = pd.read_csv("correct_LAB_format_images_data.csv")
     luminance = df["luminance"].to_numpy()
