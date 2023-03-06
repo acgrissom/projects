@@ -10,7 +10,7 @@ https://www.pymc.io/projects/docs/en/stable/learn/core_notebooks/model_compariso
 """
 samples = 10000
 if __name__ == "__main__":
-    df = pd.read_csv('data/AtypicalFaceData.csv')
+    df = pd.read_csv("data/cleaned/Study2_GoogleFaces_full_unbalanced.csv")
     dummies_df = pd.get_dummies(df)
     long_mean_score = df[df['hair_length'] == 'long'].discriminator_score.mean()
     short_mean_score = df[df['hair_length'] == 'short'].discriminator_score.mean()
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         
 
         
-        sigma = HalfCauchy("sigma", beta=score_std)
+        sigma = HalfNormal("sigma", sigma=score_std)
         intercept = Normal("Intercept", score_mean, sigma=score_std)
         beta_asian = Normal("Asian", asian_mu, sigma=asian_std)
         beta_black = Normal("Black", black_mu, sigma=black_std)

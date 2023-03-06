@@ -3,7 +3,7 @@ lib<-c("lme4","readr","tidyr","effects","ggplot2","psych","MASS",
        "pastecs","sjstats","car","readxl","ggdist", "svglite","gghdr")
 lapply(lib,require,character.only=TRUE)
 
-gan_hair<-read.csv("data/AtypicalFaceData.csv")
+gan_hair<-read.csv("data/WomenFaceData.csv")
 
 mean_gan_hair<- summarySE(data=gan_hair, measurevar = "discriminator_score",
                           groupvars = c("race","hair_length"),
@@ -28,8 +28,8 @@ race_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
  
 
 
-ggsave("results/figures/atypical_mens_face_dist.svg", plot=race_hair)
-ggsave("results/figures/atypical_mens_face_dist.jpg", plot=race_hair)
+ggsave("results/figures/atypical_womens_face_dist.svg", plot=race_hair)
+ggsave("results/figures/atypical_womens_face_dist.jpg", plot=race_hair)
 
 
 plot_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
@@ -47,8 +47,8 @@ plot_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hair_length)) +
        fill = "Hair") 
 
 
-ggsave("results/figures/atypical_mens_face_dist_aggregate.svg", plot=plot_hair)
-ggsave("results/figures/atypical_mens_face_dist_aggregate.jpg", plot=plot_hair)
+ggsave("results/figures/atypical_womens_face_dist_aggregate.svg", plot=plot_hair)
+ggsave("results/figures/atypical_womens_face_dist_aggregate.jpg", plot=plot_hair)
 
 
 
