@@ -86,8 +86,8 @@ print(X.columns)
 viz_model.rtree_feature_space(features=['AfrocentricMean', 'MasculinityMean'])                          
 #viz_model.view(fancy=False)
 
-plt.savefig("tree.svg")
-plt.savefig("tree.png")
+plt.savefig("results/figures/tree.svg")
+plt.savefig("results/figures/tree.png")
 #plt.show()
 
 exit()
