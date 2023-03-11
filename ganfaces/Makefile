@@ -31,6 +31,13 @@ results/figures/luminance_hdr.pdf: scripts/luminance_hdr.R
 	inkscape results/figures/luminance_hdr.svg --export-type=pdf --export-filename=results/figures/luminance_hdr.pdf
 	catimg results/figures/luminance_hdr.jpg
 
+results/figures/red_skin_grid.pdf: scripts/2d_score_correlation.R
+	mkdir -p results/figures
+	Rscript scripts/2d_score_correlation.R
+	inkscape results/figures/red_skin_grid.svg --export-type=pdf --export-filename=results/figures/red_skin_grid.pdf
+	catimg results/figures/red_skin_grid.jpg
+
+
 
 results/figures/luminance_dist.pdf: scripts/luminance_hdr.pdf
 	inkscape results/figures/luminance_dist.svg --export-type=pdf --export-filename=results/figures/luminance_dist.pdf
@@ -47,6 +54,10 @@ results/figures/atypical_womens_face_dist.pdf: scripts/woman_atypical_dist_plot.
 	inkscape results/figures/atypical_womens_face_dist_aggregate.svg --export-type=pdf --export-filename=results/figures/atypical_womens_face_dist_aggregate.pdf
 	inkscape results/figures/atypical_womens_face_race_dist_aggregate.svg --export-type=pdf --export-filename=results/figures/atypical_womens_face_race_dist_aggregate.pdf
 	catimg results/figures/atypical_mens_face_dist.jpg
+
+results/figures/atypical_all_50face_unbalanced_dist.pdf: results/figures/atypical_all_50face_dist.pdf
+	inkscape results/figures/atypical_all_50face_unbalanced_dist.svg --export-type=pdf --export-filename=results/figures/atypical_all_50face_unbalanced_dist.pdf
+	catimg results/figures/atypical_all_50face_unbalanced_dist.jpg
 
 results/figures/atypical_all_50face_dist.pdf: scripts/atypical_plot_cleaned.R
 	mkdir -p results/figures
@@ -65,10 +76,15 @@ results/figures/atypical_mens_face_dist.pdf: scripts/AtypicalFacePlotCode.R
 	inkscape results/figures/atypical_mens_face_race_dist_aggregate.svg --export-type=pdf --export-filename=results/figures/atypical_mens_face_race_dist_aggregate.pdf
 	catimg results/figures/atypical_mens_face_dist.jpg
 
+results/figures/rgb_posteriors_hdi.pdf: /results/figures/rgb_posteriors.pdf
+	inkscape results/figures/rgb_posteriors_hdi.svg --export-type=pdf --export-filename=results/figures/rgb_posteriors_hdi.pdf
+
+
 results/figures/rgb_posteriors.pdf: scripts/rgb_linear_regression.py
 	mkdir -p results/figures
 	python scripts/rgb_linear_regression.py
 	inkscape results/figures/rgb_posteriors.svg --export-type=pdf --export-filename=results/figures/rgb_posteriors.pdf
+
 	catimg results/figures/rgb_posteriors.jpg
 
 results/figures/race_hair_posteriors.pdf: scripts/race_hair_linear_regression.py
@@ -77,8 +93,15 @@ results/figures/race_hair_posteriors.pdf: scripts/race_hair_linear_regression.py
 	inkscape results/figures/race_hair_posteriors.svg --export-type=pdf --export-filename=results/figures/race_hair_posteriors.pdf
 	catimg results/figures/race_hair_posteriors.jpg
 
+results/figures/ordinal_posteriors.pdf: scripts/race_hair_linear_regression.py
+	mkdir -p results/figures
+	python scripts/ordinal_regression.py
+	inkscape results/figures/ordinal_posteriors.svg --export-type=pdf --export-filename=results/figures/ordinal_posteriors.pdf
+	catimg results/figures/ordinal_posteriors.jpg
 
-results/figures: results/figures/luminance_hdr.pdf results/figures/training_color_histogram_logscale.pdf results/figures/training_color_scatter.png scripts/color_histogram.py results/figures/luminance_hdr.pdf results/figures/atypical_all_50face_dist.pdf
+
+
+results/figures: results/figures/luminance_hdr.pdf results/figures/training_color_histogram_logscale.pdf results/figures/training_color_scatter.png scripts/color_histogram.py results/figures/luminance_hdr.pdf results/figures/atypical_all_50face_dist.pdf results/figures/red_skin_grid.pdf
 
 git_update:
 	git add scripts/*.R scripts/*.py

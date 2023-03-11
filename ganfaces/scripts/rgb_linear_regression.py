@@ -1,5 +1,5 @@
 import pymc
-from pymc import Normal, HalfNormal, sample
+from pymc import Normal, HalfNormal, sample, HalfStudentT, HalfCauchy
 import pandas as pd
 import arviz as az
 import matplotlib.pyplot as plt
@@ -23,17 +23,25 @@ if __name__ == "__main__":
 
 
     with pymc.Model() as regression:  # model specifications in PyMC are wrapped in a with-statement
+        gamma = 2
         # Define priors
-        sigma = HalfNormal("sigma", sigma=score_std)
-        intercept = Normal("Intercept", score_mean, score_std)
-        beta_red = Normal("red", 0, sigma=red_std)
-        beta_green = Normal("green", 0, sigma=green_std)
-        beta_blue = Normal("blue", 0, sigma=blue_std)
-        beta_asian = Normal("Asian", 0, sigma=20)
-        beta_black = Normal("Black", 0, sigma=20)
-        beta_white = Normal("White", 0, sigma=20)
-        beta_long = Normal("long", 0, sigma=20)
-        beta_short = Normal("short", 0, sigma=20)
+
+        sigma_red = HalfStudentT("sigma_red",sigma=1, nu=10)
+        sigma_green = HalfStudentT("sigma_green",sigma=1, nu=10)
+        sigma_blue = HalfStudentT("sigma_blue",sigma=1, nu=10)
+        sigma_int = HalfStudentT("sigma_int",sigma=1, nu=10)
+        #mu_int = HalfNormal("mu_score", mu=score_mean, sigma = 1)
+        
+        sigma = HalfStudentT("sigma_score", sigma=1, nu = 10)
+        intercept = Normal("$\\beta_0$", score_mean, sigma_int)
+        beta_red = Normal("red", 0, sigma=sigma_red)
+        beta_green = Normal("green", 0, sigma=sigma_green)
+        beta_blue = Normal("blue", 0, sigma=sigma_blue)
+        # beta_asian = Normal("Asian", 0, sigma=20)
+        # beta_black = Normal("Black", 0, sigma=20)
+        # beta_white = Normal("White", 0, sigma=20)
+        # beta_long = Normal("long", 0, sigma=20)
+        # beta_short = Normal("short", 0, sigma=20)
         xr = df.red_mean.values
         xg = df.green_mean.values
         xb = df.blue_mean.values
@@ -54,19 +62,33 @@ if __name__ == "__main__":
         
         # Inference!
         # draw 3000 posterior samples using NUTS sampling
-        trained_reg = sample(10000, return_inferencedata=True)
+        trained_reg = sample(50000,
+                             chains=10,
+                             cores=8,
+                             return_inferencedata=True)
         var_names=["red", "green", "blue", "Black", "White","Asian", "long", "short"]
         var_names=["Black", "White","Asian", "long", "short"]
-        var_names=["red", "green", "blue"]
+        var_names=["red", "green", "blue", "$\\beta_0$"]
         az.plot_trace(trained_reg,
                       var_names=var_names,
-                      figsize=(7,7),
+                      #figsize=(7,3.5),
                       kind="rank_bars",
                       compact=True,
                       combined=True,
-                      rug=True);
+                      rug=False)
         plt.savefig('results/figures/rgb_posteriors.svg')
         plt.savefig('results/figures/rgb_posteriors.jpg')
+
+        post_plot = az.plot_posterior(trained_reg,var_names=var_names,
+                                      hdi_prob=0.95,
+                                      figsize=(7,7),
+                                      textsize=10,
+                                      grid=(2,2)
+                                      )
+        plt.savefig('results/figures/rgb_posteriors_hdi.svg')
+        plt.savefig('results/figures/rgb_posteriors_hdi.jpg')
+        plt.show()
+
         #ax, = pymc.plot_posterior(trained_reg)
         # ax, = pymc.plot_posterior(trained_reg,
         #                           hdi_prob=0.95,

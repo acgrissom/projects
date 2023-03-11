@@ -8,7 +8,10 @@ gan_hair_unbalanced<-read.csv("data/cleaned/Study2_GoogleFaces_full_unbalanced.c
 mean_gan_hair<- summarySE(data=gan_hair, measurevar = "discriminator_score",
                           groupvars = c("stim.race","hairlength", "stim.gen"),
                           na.rm = FALSE, conf.interval = 0.95)
-                          
+
+
+
+
 race_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hairlength)) +
     geom_density(alpha = 0.25)+
     facet_grid(stim.race ~ stim.gen) +
@@ -25,11 +28,11 @@ race_hair<- ggplot(gan_hair, aes(x=discriminator_score, fill = hairlength)) +
        fill = "Hair") 
 
 
- 
 
 
-ggsave("results/figures/atypical_all_50face_dist.svg", plot=race_hair, width=14)
-ggsave("results/figures/atypical_all_50face_dist.jpg", plot=race_hair, width=14)
+
+ggsave("results/figures/atypical_all_50face_dist.svg", plot=race_hair, height = 5, width=14)
+ggsave("results/figures/atypical_all_50face_dist.jpg", plot=race_hair, height=5, width=14)
 
 
 race_hair_unbalanced<- ggplot(gan_hair_unbalanced, aes(x=discriminator_score, fill = hairlength)) +
@@ -37,21 +40,20 @@ race_hair_unbalanced<- ggplot(gan_hair_unbalanced, aes(x=discriminator_score, fi
     facet_grid(stim.race ~ stim.gen) +
     #theme_minimal() +
     theme(strip.text.y = element_text(size = 14),
-          #legend.position="bottom",
+          legend.position="bottom",
           axis.text=element_text(size=12),
           axis.title=element_text(size=14),
           legend.title=element_text(size=12, face="bold"), 
           legend.text=element_text(size=12)) +
           scale_color_colorblind() +
-          labs(y = "Density (Unbalanced)", x = "Score",
-          fill = "Hair (Unbalanced)") 
+          labs(y = "Density", x = "Score",
+          fill = "Hair") 
 
 
  
 
-
-ggsave("results/figures/atypical_all_50face_unbalanced_dist.svg", plot=race_hair_unbalanced, width=14)
-ggsave("results/figures/atypical_all_50face_unbalanced_dist.jpg", plot=race_hair_unbalanced, width=14)
+ggsave("results/figures/atypical_all_50face_unbalanced_dist.svg", plot=race_hair_unbalanced, width=7)
+ggsave("results/figures/atypical_all_50face_unbalanced_dist.jpg", plot=race_hair_unbalanced, width=7)
 
 
 race_hair_unbalanced<- ggplot(gan_hair_unbalanced, aes(x=discriminator_score, fill = hairlength)) +

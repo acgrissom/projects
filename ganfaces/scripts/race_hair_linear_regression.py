@@ -41,13 +41,23 @@ if __name__ == "__main__":
         nu_asian = HalfNormal("nu_asian",10)
         nu_long = HalfNormal("nu_long",10) 
         nu_short = HalfNormal("nu_short",10)
-        nu_man = HalfNormal("nu_man",10) + 1
+        nu_man = HalfNormal("nu_man",10)
         nu_woman = HalfNormal("nu_woman",10)
         sigma = HalfNormal("sigma", sigma=score_std)
-        intercept = Normal("Intercept", score_mean, score_std)
+        intercept = Normal("$\\beta_0$", score_mean, score_std)
         beta_red = Normal("red", 0, sigma=red_std)
         beta_green = Normal("green", 0, sigma=green_std)
         beta_blue = Normal("blue", mu=0, sigma=blue_std)
+        
+        # beta_asian = pymc.Normal("Asian", mu=0, sigma=asian_std)
+        # beta_black = pymc.Normal("Black", mu=0, sigma=black_std)
+        # beta_white = pymc.Normal("White", mu=0, sigma=white_std)
+        # beta_long = pymc.Normal("long", mu=0, sigma=long_std)
+        # beta_short = pymc.Normal("short",mu=0, sigma=short_std)
+        # beta_man = pymc.Normal("man", sigma=man_std)
+        # beta_woman = pymc.Normal("woman", sigma=woman_std)
+
+        
         beta_asian = pymc.StudentT("Asian",nu=nu_asian, mu=0, sigma=asian_std)
         beta_black = pymc.StudentT("Black",nu=nu_black, mu=0, sigma=black_std)
         beta_white = pymc.StudentT("White",nu=nu_white, mu=0, sigma=white_std)
@@ -55,6 +65,7 @@ if __name__ == "__main__":
         beta_short = pymc.StudentT("short", nu=nu_short,mu=0, sigma=short_std)
         beta_man = pymc.StudentT("man", nu=nu_man,mu=0, sigma=man_std)
         beta_woman = pymc.StudentT("woman",nu=nu_woman,mu=0, sigma=woman_std)
+
         xr = df.red_mean.values
         xg = df.green_mean.values
         xb = df.blue_mean.values
@@ -82,23 +93,29 @@ if __name__ == "__main__":
         # Inference!
         # draw 3000 posterior samples using NUTS sampling
         trained_reg = sample(10000, return_inferencedata=True)
-        var_names=["Black", "White","Asian", "long", "short", "man", "woman"]
-        #var_names=["red", "green", "blue", "Black", "White","Asian", "long", "short"]
-        #var_names=["Black", "White","Asian", "long", "short"]
+        var_names=["Black", "White","Asian", "long", "short", "man", "woman", "$\\beta_0$"]
+        #var_names=["red", "green", "blue", "Black", "White","Asian", "long", "short"]        #var_names=["Black", "White","Asian", "long", "short"]
         #var_names=["red", "green", "blue"]
         az.plot_trace(trained_reg,
                       var_names=var_names,
                       figsize=(7,7),
-                      kind="rank_bars",
+                      #kind="rank_bars",
                       compact=True,
                       combined=True,
                       rug=False);
-        plt.savefig('results/figures/race_hair_posteriors.svg')
-        plt.savefig('results/figures/race_hair_posteriors.jpg')
-        #ax, = pymc.plot_posterior(trained_reg)
+        plt.savefig('results/figures/race_hair_trace.svg')
+        plt.savefig('results/figures/race_hair_trace.jpg')
+        post_plot = az.plot_posterior(trained_reg,var_names=var_names,
+                                      hdi_prob=0.95,
+                                      figsize=(7,7),
+                                      textsize=10,
+                                      grid=(4,2))
+                                      
         # ax, = pymc.plot_posterior(trained_reg,
         #                           hdi_prob=0.95,
         #                           figsize=(7,7),
         #                           kind="rank_bars")
+        plt.savefig('results/figures/race_hair_posteriors.svg')
+        plt.savefig('results/figures/race_hair_posteriors.jpg')
         plt.show()
-        
+
