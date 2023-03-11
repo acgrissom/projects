@@ -1,7 +1,7 @@
 OUT_DIR = results/figures
 
 pip_packages:
-	pip install colormap easydev pyplot-themes pandas pandasql
+	pip install colormap easydev pyplot-themes pandas pandasql arviz
 
 mac_packages: pip_packages
 	brew install inkscape catimg imagemagick libsm xquartz
