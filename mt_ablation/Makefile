@@ -119,7 +119,7 @@ ko_corpus:
 	tar xvzf korean-english-park.dev.tar.gz
 
 ko_bpe_vocab:
-	subword-nmt learn-joint-bpe-and-vocab --input korean-english-park.train.ko korean-english-park.train.en \
+	subword-nmt learn-joint-bpe-and-vocab --input ko-en-corpus.train.ko ko-en-corpus.train.en \
                                     -s 32000 \
                                     -o bpe_ko.codes \
                                     --write-vocabulary bpe.vocab.ko bpe.vocab.en
@@ -173,6 +173,7 @@ ko_translate:
 	date >> results.txt
 	sed -re 's/(@@ |@@$ )//g' <out.bpe >out.tok
 	sacrebleu ko-en-corpus.test.en -tok none -i out.tok >> results.txt
+	python ribes_score.py ko-en-corpus.test.en
 
 
 ko_clean:
