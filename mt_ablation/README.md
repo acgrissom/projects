@@ -1,4 +1,6 @@
-MT ablation-related projects
+### MT ablation-related projects
+
+#### Things to run before to set up environment
 
 To run demo pipeline:
 
@@ -22,7 +24,7 @@ make sockeye_optional
 make apex_install
 ```
 
-Now, you can run the MT demo pipelines from Sockeye web site.
+#### MT demo pipelines from Sockeye web site.
 
 Sequence copy demo:
 ```bash
@@ -34,5 +36,16 @@ make genseqcopy.py
 make wmt_demo
 ```
 
+#### Files and Makefile Targets for Ko-En-Corpus
 
+Python files:
 
+* `morpheme.py`: converts a korean corpus into a new corpus separated by morphemes
+* `ribes_score.py`: calculates the ribes score of a translated test corpus
+* `train.py`: trains both shuffled and unshuffled models with one language as source and the other as target
+* `shuffle_test.py`: shuffles the source test ccorpus, uses it for translation for both shuffled and unshuffled models, and calculates the RIBES and BLEU score.
+
+To run the whole process of Korean English MT-ablation:
+```bash 
+make ko-everything 
+```
