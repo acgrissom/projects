@@ -1,5 +1,5 @@
 pip_dependencies:
-	pip install psutil
+	pip install psutil tensorboard
 
 do_regression:
 	@activate_env
