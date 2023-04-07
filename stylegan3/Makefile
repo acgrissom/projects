@@ -1,3 +1,6 @@
+pip_dependencies:
+	pip install psutil
+
 do_regression:
 	@activate_env
 	python -c "from regression import plot_regression; plot_regression()"
@@ -24,7 +27,11 @@ fairface_prepare:
 	--dest /mnt/data/students/fairface/data/padding_0.25/train_prepared \
 	--resolution 512x512
 
-fairface_train:
+
+fairface_clean:
+	rm -R /mnt/data/students/models/fairface_stylegan3t/training-runs
+
+fairface_train:	
 	mkdir -p /mnt/data/students/models/fairface_stylegan3t/training-runs
 	python train.py --outdir=/mnt/data/students/models/fairface_stylegan3/training-runs --cfg=stylegan3-t --data=/mnt/data/students/fairface/data/padding_0.25/train/ --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5
 
