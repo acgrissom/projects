@@ -27,6 +27,11 @@ fairface_prepare:
 	--dest /mnt/data/students/fairface/data/padding_0.25/train_prepared \
 	--resolution 512x512
 
+ffhq_prepare:
+	mkdir -p /mnt/data/students/ffhq_processed_512x512
+	python dataset_tool.py \
+	--source /mnt/data/students/ffhq_images_1024x1024 \
+	--dest /mnt/data/students/ffhq_processed_512x512
 
 fairface_clean:
 	rm -R /mnt/data/students/models/fairface_stylegan3t/training-runs
@@ -35,3 +40,9 @@ fairface_train:
 	mkdir -p /mnt/data/students/models/fairface_stylegan3t/training-runs
 	python train.py --outdir=/mnt/data/students/models/fairface_stylegan3/training-runs --cfg=stylegan3-t --data=/mnt/data/students/fairface/data/padding_0.25/train_prepared --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5
 
+make ffhq_clean:
+	rm -R /mnt/data/students/models/ffhq_stylegan3/training-runs
+
+ffhq_train:
+	mkdir -p /mnt/data/students/models/ffhq_stylegan3t/training-runs
+	python train.py outdir=/mnt/data/students/models/ffhq_stylegan3/training-runs --data=/mnt/data/students/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-t
