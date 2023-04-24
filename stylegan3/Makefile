@@ -31,7 +31,8 @@ ffhq_prepare:
 	mkdir -p /mnt/data/students/ffhq_processed_512x512
 	python dataset_tool.py \
 	--source /mnt/data/students/ffhq_images_1024x1024 \
-	--dest /mnt/data/students/ffhq_processed_512x512
+	--dest /mnt/data/students/ffhq_processed_512x512 \
+	--resolution=512x512
 
 fairface_clean:
 	rm -R /mnt/data/students/models/fairface_stylegan3t/training-runs
