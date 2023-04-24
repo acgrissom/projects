@@ -41,7 +41,7 @@ fairface_train:
 	python train.py --outdir=/mnt/data/students/models/fairface_stylegan3/training-runs --cfg=stylegan3-t --data=/mnt/data/students/fairface/data/padding_0.25/train_prepared --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5
 
 make ffhq_clean:
-	rm -R /mnt/data/students/models/ffhq_stylegan3/training-runs
+	rm -R /mnt/data/students/models/ffhq_stylegan3t/training-runs
 
 ffhq_train:
 	mkdir -p /mnt/data/students/models/ffhq_stylegan3t/training-runs
