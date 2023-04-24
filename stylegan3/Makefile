@@ -45,4 +45,4 @@ make ffhq_clean:
 
 ffhq_train:
 	mkdir -p /mnt/data/students/models/ffhq_stylegan3t/training-runs
-	python train.py outdir=/mnt/data/students/models/ffhq_stylegan3/training-runs --data=/mnt/data/students/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-t
+	python train.py outdir=/mnt/data/students/models/ffhq_stylegan3t/training-runs --data=/mnt/data/students/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-t
