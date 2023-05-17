@@ -1,7 +1,8 @@
 from mecab import MeCab
 import sys
+import openkorpos_dic
 
-mecab = MeCab()
+mecab = MeCab(dictionary_path=openkorpos_dic.DICDIR)
 
 r_file = open(sys.argv[1], 'r')
 w_file = open(sys.argv[2], 'w')
