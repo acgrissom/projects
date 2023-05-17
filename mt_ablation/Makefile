@@ -12,6 +12,7 @@ apex_install: apex
 
 conda_environment:
 	conda create -n sockeye python=3.8	
+
 sockeye:
 	pip install sockeye --no-deps
 	pip install tensorboard
@@ -108,7 +109,7 @@ clean_data:
 	rm -Rf wmt_model
 	rm -RF *.sgm
 
-# this corpus is quite small and does not produce good results. The new dataset is downloaded.
+# this corpus is quite small and does not produce good results. The new dataset is inside /share/kuran/data/joseph.
 ko_corpus:
 	curl -JLO https://github.com/jungyeul/korean-parallel-corpora/raw/master/korean-english-news-v1/korean-english-park.train.tar.gz
 	curl -JLO https://github.com/jungyeul/korean-parallel-corpora/raw/master/korean-english-news-v1/korean-english-park.dev.tar.gz 
@@ -118,69 +119,93 @@ ko_corpus:
 	tar xvzf korean-english-park.test.tar.gz
 	tar xvzf korean-english-park.dev.tar.gz
 
-ko_bpe_vocab:
-	subword-nmt learn-joint-bpe-and-vocab --input ko-en-corpus.train.ko ko-en-corpus.train.en \
+# creating bpe files for ko-en-corpus
+bpe_ko.codes:
+	subword-nmt learn-joint-bpe-and-vocab --input /share/kuran/data/joseph/korean_corpus/ko-en-corpus.train.ko /share/kuran/data/joseph/korean_corpus/ko-en-corpus.train.en \
                                     -s 32000 \
                                     -o bpe_ko.codes \
                                     --write-vocabulary bpe.vocab.ko bpe.vocab.en
-ko-BPE:
-	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.ko <  ko-en-corpus.train.ko >  ko-en-corpus.train.BPE.ko
-	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.en <  ko-en-corpus.train.en >  ko-en-corpus.train.BPE.en
-	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.ko <  ko-en-corpus.val.ko >  ko-en-corpus.val.BPE.ko
-	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.en <  ko-en-corpus.val.en >  ko-en-corpus.val.BPE.en
-	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.ko <  ko-en-corpus.test.ko >  ko-en-corpus.test.BPE.ko
-	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.en <  ko-en-corpus.test.en >  ko-en-corpus.test.BPE.en
 
-ko_morpheme:
-	python morpheme.py ko-en-corpus.train.ko ko-en-corpus.train.morph.ko
-	python morpheme.py ko-en-corpus.test.ko ko-en-corpus.test.morph.ko
-	python morpheme.py ko-en-corpus.val.ko ko-en-corpus.val.morph.ko
+bpe.ko-en-corpus.train.ko:
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.ko <  /share/kuran/data/joseph/korean_corpus/ko-en-corpus.train.ko >  bpe.ko-en-corpus.train.ko
 
+bpe.ko-en-corpus.train.en:
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.en <  /share/kuran/data/joseph/korean_corpus/ko-en-corpus.train.en >  bpe.ko-en-corpus.train.en
 
-ko_prepare_data:
-	python -m sockeye.prepare_data \
-                    	-s ko-en-corpus.train.BPE.ko \
-                    	-t ko-en-corpus.train.BPE.en \
-                    	--shared-vocab --word-min-count 2 \
-                    	--pad-vocab-to-multiple-of 8 \
-                    	--max-seq-len 95 \
-                    	--num-samples-per-shard 10000000 \
-                    	-o ko_prepare_data
+bpe.ko-en-corpus.val.ko:
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.ko <  /share/kuran/data/joseph/korean_corpus/ko-en-corpus.val.ko >  bpe.ko-en-corpus.val.ko
 
-ko_train_data:
-	python -m sockeye.train -d ko_prepare_data \
-            	--validation-source  ko-en-corpus.val.BPE.ko \
-            	--validation-target ko-en-corpus.val.BPE.en \
-            	--output ko_en_model --num-layers 6 \
-            	--transformer-model-size 1024 --transformer-attention-heads 16 \
-            	--transformer-feed-forward-num-hidden 4096 --amp --batch-type max-word \
-            	--batch-size 5000 --update-interval 80 --checkpoint-interval 500 \
-            	--max-num-checkpoint-not-improved 20 --optimizer-betas 0.9:0.98 \
-            	--initial-learning-rate 0.06325 \
-            	--learning-rate-scheduler-type inv-sqrt-decay --learning-rate-warmup 4000 \
-            	--seed 1
+bpe.ko-en-corpus.val.en:
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.en <  /share/kuran/data/joseph/korean_corpus/ko-en-corpus.val.en >  bpe.ko-en-corpus.val.en
 
-ko_translate:
-	python -m sockeye.translate \
-		--input ko-en-corpus.test.BPE.ko \
-		--output out.bpe \
-		--model ko_en_model \
-		--dtype float16 \
-		--beam-size 5 \
-		--batch-size 64
+bpe.ko-en-corpus.test.ko:
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.ko <  /share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.ko >  bpe.ko-en-corpus.test.ko
 
-	echo "\n" >> results.txt
-	date >> results.txt
-	sed -re 's/(@@ |@@$ )//g' <out.bpe >out.tok
-	sacrebleu ko-en-corpus.test.en -tok none -i out.tok >> results.txt
-	python ribes_score.py ko-en-corpus.test.en
+bpe.ko-en-corpus.test.en:
+	subword-nmt apply-bpe -c bpe_ko.codes --vocabulary bpe.vocab.en <  /share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.en >  bpe.ko-en-corpus.test.en
 
+# apply bpe to all
+bpe_all: bpe.ko-en-corpus.train.ko bpe.ko-en-corpus.train.en bpe.ko-en-corpus.val.ko bpe.ko-en-corpus.val.en bpe.ko-en-corpus.test.ko bpe.ko-en-corpus.test.en
+
+morph.ko-en-corpus.train.ko:
+	python morpheme.py /share/kuran/data/joseph/korean_corpus/ko-en-corpus.train.ko morph.ko-en-corpus.train.ko
+
+morph/ko-en-corpus.test.ko:
+	python morpheme.py /share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.ko morph/ko-en-corpus.test.ko
+
+morph/ko-en-corpus.val.ko:
+	python morpheme.py /share/kuran/data/joseph/korean_corpus/ko-en-corpus.val.ko morph.ko-en-corpus.val.ko
+
+# apply morph to all
+morpheme_all: morph.ko-en-corpus.train.ko morph/ko-en-corpus.test.ko morph/ko-en-corpus.val.ko
+
+ko_en_model:
+	python train.py ko en ns
+
+shuffled_ko_en_model:
+	python train.py ko en s
+
+en_ko_model:
+	python train.py en ko ns
+
+shuffled_en_ko_model:
+	python train.py en ko s
+
+shuffled_ko_ko_model:
+	python train.py ko ko s
+
+ko_en_results.txt:
+	python shuffle_test.py ko en ns
+
+shuffled_ko_en_results.txt:
+	python shuffle_test.py ko en s
+
+en_ko_results.txt:
+	python shuffle_test.py en ko ns
+
+shuffled_en_ko_results.txt:
+	python shuffle_test.py en ko s
+
+results_all: ko_en_results.txt shuffled_ko_en_results.txt en_ko_results.txt shuffled_en_ko_results.txt
+
+val_en_ko.csv:
+	python validation_bleu.py en ko
+
+val_ko_en.csv:
+	python validation_bleu.py ko en
+
+percentage_shuffle.svg:
+	python plot.py bleu
+
+percentage_shuffle_RIBES.svg:
+	python plot.py ribes
+
+percentage_shuffle2.svg:
+	python plot2.py bleu
+
+percentage_shuffle2_RIBES.svg:
+	python plot2.py ribes
 
 ko_clean:
-	mv ko_en_model models/
-	mv results.txt models/
-	rm out*
-	rm_bpe*
-	rm -r ko_prepare_data
-
+	rm bpe*
 
