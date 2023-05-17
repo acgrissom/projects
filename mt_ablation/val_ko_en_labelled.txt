@@ -1,0 +1,25 @@
+Out of 100 setences:
+Nonshuffle Correct: 61
+Shuffle Correct: 92
+Order change: 26
+Structural change: 12
+Extra words: 12
+Missing words: 19
+Incorrect words: 59
+Punctuation: 9
+Extraneous errors: 0
+
+Lines that had comments:
+26) both are wrong
+41) also plurality
+45) also plurality
+47) both are wrong
+48) shuffle is wrong but nonshuffle is not, nonshuffle even better than the reference
+59) both are wrong
+69) both are wrong
+74) Plurality
+78) both are wrong
+80) both are wrong
+93) reference wrong?
+94) shuffle is wrong but nonshuffle correct
+95) Plurality
