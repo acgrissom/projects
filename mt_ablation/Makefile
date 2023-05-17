@@ -206,6 +206,8 @@ percentage_shuffle2.svg:
 percentage_shuffle2_RIBES.svg:
 	python plot2.py ribes
 
+plot_all: percentage_shuffle.svg percentage_shuffle_RIBES.svg percentage_shuffle2.svg percentage_shuffle2_RIBES.svg
+
 ko_clean:
 	rm bpe*
 
