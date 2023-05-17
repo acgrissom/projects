@@ -1,0 +1,38 @@
+Out of 100 setences:
+Nonshuffle Correct: 75
+Shuffle Correct: 79
+Order change: 18
+Structural change: 5
+Extra words: 23
+Missing words: 24
+Incorrect words: 66
+Punctuation: 18
+Extraneous errors: 5
+
+Lines that had comments:
+10) honorific error
+15) shuffle wrong but nonshuffle correct
+17)  shuffle is wrong but nonshuffle is correct
+20) honorific error
+21) honorific error
+22) shuffle wrong but nonshuffle correct
+41) shuffle wrong but unshuffled correct
+43) both are wrong
+50) also honorific error
+58) both are wrong
+59) both are wrong
+63) both reference and original are wrong which makes both nonshuffle and shuffle wrong
+65) shuffle is wrong but nonshuffle correct
+66) shuffle is wrong but nonshuffle correct 
+71) both are wrong
+72) both are wrong
+75) both are wrong
+77) shuffle is wrong but nonshuffle correct
+79) shuffle is wrong but nonshuffle correct
+81) shuffle is wrong but nonshuffle is correct
+83) honorific
+84) shuffle is wrong but nonshuffle correct
+85) shuffle is wrong but nonshuffle correct
+90) shuffle is wrong but nonshuffle correct
+91) original is wrong which makes everything wrong
+93) shuffle is wrong but nonshuffle correct
