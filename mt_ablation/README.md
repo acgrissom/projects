@@ -49,6 +49,13 @@ Python files:
 * `plot2.py`: plots scores of en-ko.
 * `validation_bleu.py`: creates a csv file of top 100 sentences where shuffle scored better than nonshuffle.
 
+Other files:
+
+* `val_en_ko_labelled.csv`: top 100 sentences where shuffled scored better than nonshuffled for en-ko models with labels to show types of errors
+* `val_en_ko_labelled.txt`: reads through `val_en_ko_labelled.csv` and counts the different errors along with comments
+* `val_ko_en_labelled.csv`: top 100 sentences where shuffled scored better than nonshuffled for ko-en models with labels to show types of errors
+* `val_ko_en_labelled.txt`: reads through `val_ko_en_labelled.csv` and counts the different errors along with comments
+
 To run the whole process of Korean English MT-ablation:
 
 1. Tokenize korean corpus with BPE
@@ -68,6 +75,14 @@ make results_all
 
 ```bash
 make plot_all
+```
+
+4. Deleting files that were created
+
+```bash
+make bpe_clean
+make results_clean
+make plot_clean
 ```
 
 Optional: Train models (optional as the models are already backed up, this process takes a lot of time)
