@@ -93,6 +93,6 @@ make shuffled_ko_en_model
 make en_ko_model
 make shuffled_en_ko_model
 make shuffled_ko_ko_model
-```bash
+```
 
 
