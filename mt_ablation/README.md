@@ -42,10 +42,42 @@ Python files:
 
 * `morpheme.py`: converts a korean corpus into a new corpus separated by morphemes
 * `ribes_score.py`: calculates the ribes score of a translated test corpus
+* `ribes_Score_ko.py`: `ribes_score.py` but for korean as the target language
 * `train.py`: trains both shuffled and unshuffled models with one language as source and the other as target
 * `shuffle_test.py`: shuffles the source test ccorpus, uses it for translation for both shuffled and unshuffled models, and calculates the RIBES and BLEU score.
+* `plot.py`: plots scores of en-fr, en-es, and es-fr in RIBES and BLEU
+* `plot2.py`: plots scores of en-ko.
+* `validation_bleu.py`: creates a csv file of top 100 sentences where shuffle scored better than nonshuffle.
 
 To run the whole process of Korean English MT-ablation:
+
+1. Tokenize korean corpus with BPE
+
 ```bash 
-make ko-everything 
+make bpe_ko.codes
+make bpe_all
 ```
+
+2. Produce BLEU and RIBES score for all models
+
+```bash
+make results_all
+```
+
+3. Plotting the scores in svg
+
+```bash
+make plot_all
+```
+
+Optional: Train models (optional as the models are already backed up, this process takes a lot of time)
+
+```bash
+make ko_en_model
+make shuffled_ko_en_model
+make en_ko_model
+make shuffled_en_ko_model
+make shuffled_ko_ko_model
+```bash
+
+
