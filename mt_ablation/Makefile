@@ -174,19 +174,19 @@ shuffled_en_ko_model:
 shuffled_ko_ko_model:
 	python train.py ko ko s
 
-ko_en_results.txt:
+results_ko_en.txt:
 	python shuffle_test.py ko en ns
 
-shuffled_ko_en_results.txt:
+results_shuffled_ko_en.txt:
 	python shuffle_test.py ko en s
 
-en_ko_results.txt:
+results_en_ko.txt:
 	python shuffle_test.py en ko ns
 
-shuffled_en_ko_results.txt:
+results_shuffled_en_ko.txt:
 	python shuffle_test.py en ko s
 
-results_all: ko_en_results.txt shuffled_ko_en_results.txt en_ko_results.txt shuffled_en_ko_results.txt
+results_all: results_ko_en.txt results_shuffled_ko_en.txt results_en_ko.txt results_shuffled_en_ko.txt
 
 val_en_ko.csv:
 	python validation_bleu.py en ko
@@ -208,6 +208,15 @@ percentage_shuffle2_RIBES.svg:
 
 plot_all: percentage_shuffle.svg percentage_shuffle_RIBES.svg percentage_shuffle2.svg percentage_shuffle2_RIBES.svg
 
-ko_clean:
+bpe_clean:
 	rm bpe*
+
+results_clean:
+	rm results*
+
+plot_clean:
+	rm percentage_shuffle*
+
+clean_all: bpe_clean results_clean plot_clean
+
 

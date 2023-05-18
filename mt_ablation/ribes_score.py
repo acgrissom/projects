@@ -51,9 +51,7 @@ def get_ribes_score(test_file : str, out_file : str):
             print(score)
         
         scores.append(score)
-        
 
-    print(sum(scores)/ len(scores))
     avg = sum(scores)/ len(scores)
     return avg
 

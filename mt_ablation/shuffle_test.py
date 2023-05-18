@@ -80,17 +80,17 @@ def translate(bpe, source_lang, target_lang, model):
 
     if target_lang == "ko":
         
-        bleu = subprocess.run(["python", "ribes_score_ko.py", f"/share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.{target_lang}"], 
+        ribes = subprocess.run(["python", "ribes_score_ko.py", f"/share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.{target_lang}"], 
                        capture_output=True, text=True)
 
-        ribes = subprocess.run(["sacrebleu", f"/share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.{target_lang}", 
+        bleu = subprocess.run(["sacrebleu", f"/share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.{target_lang}", 
                        "-tok", "ko-mecab", "-i", "out.tok", "-b"], capture_output=True, text=True)
 
     else:
-        bleu = subprocess.run(["python", "ribes_score.py", f"/share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.{target_lang}"], 
+        ribes = subprocess.run(["python", "ribes_score.py", f"/share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.{target_lang}"], 
                        capture_output=True, text=True)
         
-        ribes = subprocess.run(["sacrebleu", f"/share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.{target_lang}", 
+        bleu = subprocess.run(["sacrebleu", f"/share/kuran/data/joseph/korean_corpus/ko-en-corpus.test.{target_lang}", 
                        "-tok", "none", "-i", "out.tok", "-b"], capture_output=True, text=True)
 
     bleu_scores.append(bleu.stdout.strip())
@@ -135,18 +135,22 @@ if __name__ == "__main__":
             remove(bpe, shuffled_output_file_name)
 
         if option == "s":
-            file = f"shuffled_{source_lang}_{target_lang}_results.txt"
+            file = f"results_shuffled_{source_lang}_{target_lang}.txt"
 
         else:
-            file = f"{source_lang}_{target_lang}_results.txt"
+            file = f"results_{source_lang}_{target_lang}.txt"
 
         with open(file, 'w') as f:
-            f.write("BLEU: ")
-            f.write(' '.join(bleu_scores))
+
+            f.write("BLEU\n")
+
+            for i in range(len(shuffle_values)):
+                f.write(f"{shuffle_values[i]}) {bleu_scores[i]}\n")
             f.write("\n")
 
-            f.write("RIBES: ")
-            f.write(' '.join(ribes_scores))
+            f.write("RIBES\n")
+            for i in range(len(shuffle_values)):
+                f.write(f"{shuffle_values[i]}) {ribes_scores[i]}\n")
             f.write("\n")
 
 
