@@ -27,6 +27,10 @@ fairface_prepare:
 	--dest /mnt/data/students/fairface/data/padding_0.25/train_prepared \
 	--resolution 512x512
 
+fairface_color_data.csv: get_average_colors.py
+	python get_average_colors.py --images_dir=/mnt/data/students/fairface/data/padding_0.25/train_prepared --dest_csv=./fairface_color_data.csv
+
+
 ffhq_prepare:
 	mkdir -p /mnt/data/students/ffhq_processed_512x512
 	python dataset_tool.py \
