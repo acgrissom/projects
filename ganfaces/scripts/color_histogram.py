@@ -1,10 +1,13 @@
 import matplotlib.pyplot as plt
-import pyplot_themes as themes
 import pandas as pd
 from colormap import rgb2hex
 from sklearn.cluster import KMeans
 import seaborn as sns
+import os
+from pathlib import Path
+import argparse
 
+Path('/root/dir/sub/file.ext').stem
 OUT_DIR = 'results/figures/'
 def load_data(filename='data/correct_LAB_format_images_data.csv'):
     return pd.read_csv(filename)
@@ -19,7 +22,7 @@ def append_hex_colors(df):
         hex_list.append(hex_val)
     df['color_mean'] = hex_list
 
-def plot_scatter(df) -> tuple:
+def plot_scatter(df, filename_prefix) -> tuple:
     plot = plt.figure(figsize=(7,7))
     plt.style.use('ggplot')
     plt.scatter(df.luminance, df.scores_rgb, c=df.color_mean, alpha=0.6, marker='s')
@@ -27,8 +30,8 @@ def plot_scatter(df) -> tuple:
     plt.ylabel("Score", fontsize=12)
 
     #plt.savefig(OUT_DIR + 'training_color_scatter.svg') #takes too long/too big
-    plt.savefig(OUT_DIR + 'training_color_scatter.jpg')
-    plt.savefig(OUT_DIR + 'training_color_scatter.png', dpi=100)
+    plt.savefig(OUT_DIR + "/" +  filename_prefix + '_color_scatter.jpg')
+    plt.savefig(OUT_DIR + "/" + filename_prefix + '_color_scatter.png', dpi=100)
     return plot
 
 
@@ -133,7 +136,7 @@ def plot_histogram_bin_by_score(df, num_bins=6):
     plt.savefig(OUT_DIR + 'training_color_histogram_logscale.jpg')
     
 
-def seaborn_plot_histogram_bin_by_score(df, num_bins=6):
+def seaborn_plot_histogram_bin_by_score(df, filename_prefix, num_bins=6):
     plt.style.use('ggplot')
     plt.figure(figsize=(7 , 7))
     bin_colors  = find_average_color_by_bin(df, num_bins)
@@ -153,8 +156,8 @@ def seaborn_plot_histogram_bin_by_score(df, num_bins=6):
     #plt.legend(labelcolor='black')
 
                  
-    plt.savefig(OUT_DIR + 'training_color_histogram_logscale.svg')
-    plt.savefig(OUT_DIR + 'training_color_histogram_logscale.jpg')
+    plt.savefig(OUT_DIR + "/" + filename_prefix + "_color_histogram_logscale.svg")
+    plt.savefig(OUT_DIR + "/" + filename_prefix + "_color_histogram_logscale.jpg")
 
 
 """Doesn't work."""
@@ -195,11 +198,19 @@ def make_marginal_hexplot(df, num_bins=6):
     
 if __name__ == "__main__":
    #themes.theme_minimal()
-    NUM_BINS = 20
-    df = load_data()
+    parser = argparse.ArgumentParser(
+        description='Plots binned histograms (by score) with average colors')
+    parser.add_argument('-b', '--num_bins', default=20, type=int)     
+    parser.add_argument('-i', '--input_csv', type=str)
+    parser.add_argument('-o', '--output_filename', type=str)
+    args = parser.parse_args()
+    NUM_BINS = args.num_bins
+    OUT_DIR = os.path.dirname(args.output_filename)
+    filename_prefix = Path(args.output_filename).stem
+    df = load_data(args.input_csv)
     append_hex_colors(df)
-    plot_scatter(df)
-    seaborn_plot_histogram_bin_by_score(df, num_bins=NUM_BINS)
+    plot_scatter(df, filename_prefix)
+    seaborn_plot_histogram_bin_by_score(df, filename_prefix, num_bins=NUM_BINS)
 
     #plt.show()
     

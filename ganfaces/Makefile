@@ -1,7 +1,7 @@
 OUT_DIR = results/figures
 
 pip_packages:
-	pip install colormap easydev pyplot-themes pandas pandasql arviz
+	pip install colormap easydev pandas pandasql arviz
 
 mac_packages: pip_packages
 	brew install inkscape catimg imagemagick libsm xquartz
@@ -19,17 +19,39 @@ results/figures/training_color_histogram_logscale.pdf:
 	inkscape results/figures/training_color_histogram_logscale.svg --export-type=pdf --export-filename=results/figures/training_color_histogram_logscale.pdf
 	catimg results/figures/training_color_histogram_logscale.jpg
 
+results/figures/fairface_color_histogram_logscale.pdf:
+	mkdir -p results/figures
+	python scripts/color_histogram.py --input_csv data/fairface_data.csv --output_filename results/figures/fairface --num_bins=10
+	inkscape results/figures/fairface_color_histogram_logscale.svg --export-type=pdf --export-filename=results/figures/fairface_color_histogram_logscale.pdf
+	catimg results/figures/fairface_color_histogram_logscale.jpg
+
+
+results/figures/ffhq_color_histogram_logscale.pdf:
+	mkdir -p results/figures
+	python scripts/color_histogram.py --input_csv data/fairface_data.csv --output_filename results/figures/ffhq --num_bins=20
+	inkscape results/figures/ffhq_color_histogram_logscale.svg --export-type=pdf --export-filename=results/figures/ffhq_color_histogram_logscale.pdf
+	catimg results/figures/ffhq_color_histogram_logscale.jpg
+
+
 
 results/figures/training_color_scatter.png:
 	mkdir -p results/figures
 	python scripts/color_histogram.py
 	catimg results/figures/training_color_scatter.png
 
-results/figures/luminance_hdr.pdf: scripts/luminance_hdr.R
+results/figures/ffhq_luminance_hdr.pdf: scripts/luminance_hdr.R
 	mkdir -p results/figures
-	Rscript scripts/luminance_hdr.R
-	inkscape results/figures/luminance_hdr.svg --export-type=pdf --export-filename=results/figures/luminance_hdr.pdf
-	catimg results/figures/luminance_hdr.jpg
+	Rscript scripts/luminance_hdr.R data/correct_LAB_format_images_data.csv results/figures/ffhq
+	inkscape results/figures/ffhq_luminance_hdr.svg --export-type=pdf --export-filename=results/figures/ffhq_luminance_hdr.pdf
+	catimg results/figures/ffhq_luminance_hdr.jpg
+
+
+results/figures/fairface_luminance_hdr.pdf: scripts/luminance_hdr.R
+	mkdir -p results/figures
+	Rscript scripts/luminance_hdr.R data/fairface_data.csv results/figures/fairface
+	inkscape results/figures/fairface_luminance_hdr.svg --export-type=pdf --export-filename=results/figures/fairface_luminance_hdr.pdf
+	catimg results/figures/fairface_luminance_hdr.jpg
+
 
 results/figures/red_skin_grid.pdf: scripts/2d_score_correlation.R
 	mkdir -p results/figures
@@ -39,9 +61,12 @@ results/figures/red_skin_grid.pdf: scripts/2d_score_correlation.R
 
 
 
-results/figures/luminance_dist.pdf: scripts/luminance_hdr.pdf
-	inkscape results/figures/luminance_dist.svg --export-type=pdf --export-filename=results/figures/luminance_dist.pdf
-	catimg results/figures/luminance_dist.jpg
+results/figures/ffhq_luminance_dist.pdf: scripts/ffhq_luminance_hdr.pdf
+	catimg results/figures/ffhq_luminance_dist.jpg
+
+results/figures/fairface_luminance_dist.pdf: scripts/fairface_luminance_hdr.pdf
+	catimg results/figures/fairface_luminance_dist.jpg
+
 
 
 
@@ -101,7 +126,7 @@ results/figures/ordinal_posteriors.pdf: scripts/race_hair_linear_regression.py
 
 
 
-results/figures: results/figures/luminance_hdr.pdf results/figures/training_color_histogram_logscale.pdf results/figures/training_color_scatter.png scripts/color_histogram.py results/figures/luminance_hdr.pdf results/figures/atypical_all_50face_dist.pdf results/figures/red_skin_grid.pdf
+results/figures:  results/figures/training_color_histogram_logscale.pdf results/figures/training_color_scatter.png scripts/color_histogram.py results/figures/ffhq_luminance_hdr.pdf results/figures/fairface_luminance_hdr.pdf results/figures/atypical_all_50face_dist.pdf results/figures/red_skin_grid.pdf results/figures/ffhq_color_histogram_logscale.pdf results/figures/fairface_color_histogram_logscale.pdf
 
 git_update:
 	git add scripts/*.R scripts/*.py
