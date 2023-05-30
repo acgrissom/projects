@@ -1,7 +1,7 @@
 OUT_DIR = results/figures
 
 pip_packages:
-	pip install colormap easydev pandas pandasql arviz
+	pip install colormap easydev pandas pandasql arviz seaborn
 
 mac_packages: pip_packages
 	brew install inkscape catimg imagemagick libsm xquartz
@@ -28,7 +28,7 @@ results/figures/fairface_color_histogram_logscale.pdf:
 
 results/figures/ffhq_color_histogram_logscale.pdf:
 	mkdir -p results/figures
-	python scripts/color_histogram.py --input_csv data/fairface_data.csv --output_filename results/figures/ffhq --num_bins=20
+	python scripts/color_histogram.py --input_csv data/ffhq_color_data.csv --output_filename results/figures/ffhq --num_bins=20
 	inkscape results/figures/ffhq_color_histogram_logscale.svg --export-type=pdf --export-filename=results/figures/ffhq_color_histogram_logscale.pdf
 	catimg results/figures/ffhq_color_histogram_logscale.jpg
 
