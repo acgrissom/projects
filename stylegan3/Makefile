@@ -31,18 +31,18 @@ fairface_prepare:
 fairface_color_data.csv: get_average_colors.py
 	python get_average_colors.py --images_dir /mnt/data/students/fairface/data/padding_0.25/train_prepared --dest_csv ./fairface_color_data.csv --gan_model /mnt/data/students/models/fairface_stylegan3/training-runs/00011-stylegan3-t-train_prepared-gpus8-batch32-gamma8.2/network-snapshot-007000.pkl
 
-fairface_data_ffhq_model.csv: get_average_colors.py
+fairface_data_ffhq_stylegan3r_model.csv: get_average_colors.py
 	python get_average_colors.py \
 	--images_dir /mnt/data/students/fairface/data/padding_0.25/train_prepared \
-	--dest_csv ./fairface_data_ffhq_model.csv \
-	--gan_model /mnt/data/students/models/stylegan3-official/stylegan3-t-ffhq-1024x1024.pkl --resize 1024
+	--dest_csv ./fairface_data_ffhq_styleganr-model.csv \
+	--gan_model /mnt/data/students/models/stylegan3-official/stylegan3-r-ffhq-1024x1024.pkl --resize 1024
 
 
-ffhq_color_data.csv: get_average_colors.py
+ffhq_color_data_ffhq_stylegan3r_model.csv: get_average_colors.py
 	python get_average_colors.py \
 	--images_dir /mnt/data/students/ffhq_images_1024x1024 \
-	--dest_csv ./ffhq_color_data.csv \
-	--gan_model /mnt/data/students/models/stylegan3-official/stylegan3-t-ffhq-1024x1024.pkl #--resize 1024
+	--dest_csv ./ffhq_color_data_ffhq_stylegan3r_model.csv \
+	--gan_model /mnt/data/students/models/stylegan3-official/stylegan3-r-ffhq-1024x1024.pkl #--resize 1024
 
 
 

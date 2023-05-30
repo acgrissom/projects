@@ -15,8 +15,6 @@ import sys
 import argparse
 import time
 
-#gan_model_filename = "/mnt/data/students/models/fairface_stylegan3/training-runs/00011-stylegan3-t-train_prepared-gpus8-batch32-gamma8.2/network-snapshot-007000.pkl"
-
 
 def get_discriminator(gan_model_filename):
     with open(gan_model_filename, 'rb') as f:
@@ -35,10 +33,8 @@ def get_score(image_filename, discriminator, resize=None):
     D = discriminator
     pic = torchvision.io.read_image(image_filename).cuda()
     if resize is not None:       
-        #pic = torchvision.transforms.Resize(resize)
         pic = torchvision.transforms.functional.resize(pic, resize, antialias=False)
     score = D(pic[None,:,:,:],c=None).cuda()
-    #score = float(score.cpu().numpy()[0][0])
     score = score.item()
     return score
 
@@ -56,7 +52,6 @@ def process_images(images_dir, discriminator, out_csv_filename, resize=None):
     D = discriminator
     folders = os.listdir(images_dir)
     folders = [f for f in folders if os.path.isdir(images_dir + "/" + f)]
-    print(folders)
     folders.sort()
     images = {}
     for folder in folders:
@@ -81,10 +76,6 @@ def process_images(images_dir, discriminator, out_csv_filename, resize=None):
     print("Done.")
     print(df.head())
           
-
-
-
-
 def main():
     start_time = time.time()
     parser = argparse.ArgumentParser(description='Generate CSV file with RGB and luminance values.')
@@ -93,10 +84,8 @@ def main():
     parser.add_argument('--gan_model', type=str, help="file name of GAN model to use")
     parser.add_argument('--resize', type=int, nargs=1, required=False, default=None,help="Optionally resize images to this height while maintaining aspect ratio..  For example: --resize 1024")
     args = parser.parse_args()
-    #images_dir = "/mnt/data/students/fairface/data/padding_0.25/train_prepared"
     images_dir = args.images_dir
     discriminator = get_discriminator(args.gan_model)
-    #out_csv_filename = "/mnt/data/students/fairface/data/fairface_data.csv"
     out_csv_filename = args.dest_csv
     resize = args.resize
     process_images(images_dir, discriminator, out_csv_filename, resize=resize)
