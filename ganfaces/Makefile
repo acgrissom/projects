@@ -27,9 +27,17 @@ results/figures/fairface_color_histogram_logscale.pdf:
 
 results/figures/fairface_color_histogram_ffhq_stylegan3r_model_logscale.pdf:
 	mkdir -p results/figures
-	python scripts/color_histogram.py --input_csv data/fairface_data_ffhq_stylegan3r_model.csv --output_filename results/figures/fairface_color_ffhq_stylegan3r_model --num_bins=10
+	python scripts/color_histogram.py --input_csv data/fairface_data_ffhq_stylegan3r_model.csv --output_filename results/figures/fairface_color_ffhq_stylegan3r_model --num_bins=15
 	inkscape results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.svg --export-type=pdf --export-filename=results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.pdf
 	catimg results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.jpg
+
+
+
+results/figures/fairface_data_ffhq_stylegan3r_model_luminance_hdr.pdf: scripts/luminance_hdr.R
+	mkdir -p results/figures
+	Rscript scripts/luminance_hdr.R data/fairface_data_ffhq_stylegan3r_model.csv results/figures/fairface_data_ffhq_stylegan3r_model
+	inkscape results/figures/fairface_data_ffhq_stylegan3r_model_luminance_hdr.svg --export-type=pdf --export-filename=results/figures/fairface_data_ffhq_stylegan3r_model_luminance_hdr.pdf
+	catimg results/figures/fairface_data_ffhq_stylegan3r_model_luminance_hdr.jpg
 
 
 
