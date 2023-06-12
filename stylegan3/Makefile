@@ -1,8 +1,8 @@
 NURVUS_MODELS_DIR := /mnt/data/students/models
 KURAN_MODELS_DIR := /share/kuran/models
 LOCAL_MODELS_DIR := ~/models
-#MODELS_DIR = $(KURAN_MODELS_DIR)
-MODELS_DIR = $(NURVUS_MODELS_DIR)
+#MODELS_DIR := $(KURAN_MODELS_DIR)
+MODELS_DIR := $(NURVUS_MODELS_DIR)
 
 NURVUS_IMAGES_ROOT_DIR :=  /mnt/data/students
 KURAN_IMAGES_ROOT_DIR := /share/kuran/gan_data
@@ -11,8 +11,9 @@ LOCAL_IMAGES_ROOT_DIR := ~/gan_data
 IMAGES_ROOT_DIR := $(NURVUS_IMAGES_ROOT_DIR)
 
 FAIRFACE_IMAGES_DIR := $(IMAGES_ROOT_DIR)/fairface/data/padding_0.25/train_prepared
-FFHQ_IMAGES_DIR = $(IMAGES_ROOT_DIR)/fairface/data/padding_0.25/train_prepared
-#FAIRFACE_MODELS_DIR = 
+FFHQ_IMAGES_DIR := $(IMAGES_ROOT_DIR)/fairface/data/padding_0.25/train_prepared
+#FAIRFACE_MODELS_DIR :=
+
 pip_dependencies:
 	pip install psutil tensorboard
 
@@ -43,7 +44,6 @@ fairface_prepare:
 	--resolution 512x512
 
 
-<<<<<<< HEAD
 fairface_color_data.csv: get_average_colors.py
 	python get_average_colors.py --images_dir $(FAIRFACE_IMAGES_DIR) --dest_csv ./fairface_color_data.csv --gan_model $(MODELS_DIR)/fairface_stylegan3/training-runs/00011-stylegan3-t-train_prepared-gpus8-batch32-gamma8.2/network-snapshot-007000.pkl
 
@@ -52,16 +52,15 @@ fairface_data_ffhq_stylegan3r_model.csv: get_average_colors.py
 	--images_dir $(FFHQ_IMAGES_DIR) \
 	--dest_csv ./fairface_data_ffhq_styleganr-model.csv \
 	--gan_model $(MODELS_DIR)/stylegan3-official/stylegan3-r-ffhq-1024x1024.pkl --resize 1024
-=======
+
 fairface_color_data_stylegan3t.csv: get_average_colors.py
 	python get_average_colors.py --images_dir /mnt/data/students/fairface/data/padding_0.25/train_prepared --dest_csv ./fairface_color_data.csv --gan_model /mnt/data/students/models/fairface_stylegan3/training-runs/00011-stylegan3-t-train_prepared-gpus8-batch32-gamma8.2/network-snapshot-007000.pkl
 
-fairface_data_ffhq_stylegan3r_model.csv: get_average_colors.py
-	python get_average_colors.py \
+#fairface_data_ffhq_stylegan3r_model.csv: get_average_colors.py
+#	python get_average_colors.py \
 	--images_dir /mnt/data/students/fairface/data/padding_0.25/train_prepared \
 	--dest_csv ./fairface_data_ffhq_stylegan3r-model.csv \
 	--gan_model /mnt/data/students/models/stylegan3-official/stylegan3-r-ffhq-1024x1024.pkl --resize 1024
->>>>>>> 388354c1fde21ecc15fc65a3e889f1139009ef73
 
 
 ffhq_color_data_ffhq_stylegan3r_model.csv: get_average_colors.py
@@ -70,6 +69,19 @@ ffhq_color_data_ffhq_stylegan3r_model.csv: get_average_colors.py
 	--dest_csv ./ffhq_color_data_ffhq_stylegan3r_model.csv \
 	--gan_model $(MODELS_DIR)/stylegan3-official/stylegan3-r-ffhq-1024x1024.pkl #--resize 1024
 
+
+COLOR_DATA_OUT_DIR := generated_data/average_colors/stylegan3-official
+generated_data/average_colors/stylegan3-official: get_average_colors.py
+	mkdir -p $(COLOR_DATA_OUT_DIR)
+	@for model_file in $(shell find  ${MODELS_DIR}/stylegan3-official -type f -printf "%f\n") ; do \
+		echo Creating $(COLOR_DATA_OUT_DIR)/ffhq_test_$${model_file}.csv ; \
+		python get_average_colors.py \
+		--images_dir $(FFHQ_IMAGES_DIR) \
+		--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test_$${model_file}.csv \
+		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ; \
+		rmdir $(COLOR_DATA_OUT_DIR) ; done
+	mkdir -p ../ganfaces/data/color_data/
+	cp $(COLOR_DATA_OUT_DIR)/ffhq_test_*.csv ../gan_faces/data/color_data
 
 
 
@@ -83,7 +95,7 @@ ffhq_prepare_512:
 #fairface_clean:
 #	rm -R $(MODELS_DIR)/fairface_stylegan3t/training-runs
 
-<<<<<<< HEAD
+
 fairface_train:	
 	mkdir -p $(MODELS_DIR)/fairface_stylegan3t/training-runs
 	python train.py --outdir=$(MODELS_DIR)/fairface_stylegan3/training-runs --cfg=stylegan3-t --data=$(FAIRFACE_IMAGES_DIR) --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5
@@ -95,7 +107,7 @@ fairface_train:
 ffhq_train_512:
 	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs
 	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-t
-=======
+
 fairface_train_stylegan3t:	
 	mkdir -p /mnt/data/students/models/fairface_stylegan3t/training-runs
 	python train.py --outdir=/mnt/data/students/models/fairface_stylegan3/training-runs --cfg=stylegan3-t --data=/mnt/data/students/fairface/data/padding_0.25/train_prepared --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5
@@ -115,4 +127,3 @@ ffhq_train_stylegan3t:
 
 rsync_data:
 	rsync -r /mnt/data/students /share/kuran/data/nurvus_sync
->>>>>>> 388354c1fde21ecc15fc65a3e889f1139009ef73
