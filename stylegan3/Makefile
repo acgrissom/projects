@@ -72,7 +72,7 @@ ffhq_color_data_ffhq_stylegan3r_model.csv: get_average_colors.py
 
 COLOR_DATA_OUT_DIR := generated_data/average_colors
 ${COLOR_DATA_OUT_DIR}/ffhq_test: get_average_colors.py
-	mkdir -p $(COLOR_DATA_OUT_DIR)
+	mkdir -p $(COLOR_DATA_OUT_DIR)/ffhq_test
 	@for model_file in $(shell find  ${MODELS_DIR}/stylegan3-official -type f -printf "%f\n") ; do \
 		echo Creating $(COLOR_DATA_OUT_DIR)/ffhq_test/ffhq_test_$${model_file}.csv ; \
 		python get_average_colors.py \
@@ -85,7 +85,7 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test: get_average_colors.py
 
 
 ${COLOR_DATA_OUT_DIR}/fairface_test: get_average_colors.py
-	mkdir -p $(COLOR_DATA_OUT_DIR)
+	mkdir -p $(COLOR_DATA_OUT_DIR)/fairface_test
 	@for model_file in $(shell find  ${MODELS_DIR}/stylegan3-official -type f -printf "%f\n") ; do \
 		echo Creating $(COLOR_DATA_OUT_DIR)/fairface_test/fairface_test_$${model_file}.csv ; \
 		python get_average_colors.py \
