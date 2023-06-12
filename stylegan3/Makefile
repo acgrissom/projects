@@ -79,7 +79,6 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test: get_average_colors.py
 		--images_dir $(FFHQ_IMAGES_DIR) \
 		--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test/ffhq_test_$${model_file}.csv \
 		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ; \
-		rmdir $(COLOR_DATA_OUT_DIR)/ffhq_test ; done
 	mkdir -p ../ganfaces/data/color_data/ffhq_test
 	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test ../gan_faces/data/color_data
 
@@ -92,7 +91,6 @@ ${COLOR_DATA_OUT_DIR}/fairface_test: get_average_colors.py
 		--images_dir $(FAIRFACE_IMAGES_DIR) \
 		--dest_csv $(COLOR_DATA_OUT_DIR)/fairface_test/fairface_test_$${model_file}.csv \
 		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ; \
-		rmdir $(COLOR_DATA_OUT_DIR)/fairface_test ; done
 	mkdir -p ../ganfaces/data/color_data/fairface_test
 	cp -R $(COLOR_DATA_OUT_DIR)/fairface_test ../gan_faces/data/color_data/
 
