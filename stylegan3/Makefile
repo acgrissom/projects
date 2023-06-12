@@ -11,7 +11,7 @@ LOCAL_IMAGES_ROOT_DIR := ~/gan_data
 IMAGES_ROOT_DIR := $(NURVUS_IMAGES_ROOT_DIR)
 
 FAIRFACE_IMAGES_DIR := $(IMAGES_ROOT_DIR)/fairface/data/padding_0.25/train_prepared
-FFHQ_IMAGES_DIR := $(IMAGES_ROOT_DIR)/fairface/data/padding_0.25/train_prepared
+FFHQ_IMAGES_DIR := $(IMAGES_ROOT_DIR)/ffhq_processed_512x512/
 #FAIRFACE_MODELS_DIR :=
 
 pip_dependencies:
@@ -70,20 +70,35 @@ ffhq_color_data_ffhq_stylegan3r_model.csv: get_average_colors.py
 	--gan_model $(MODELS_DIR)/stylegan3-official/stylegan3-r-ffhq-1024x1024.pkl #--resize 1024
 
 
-COLOR_DATA_OUT_DIR := generated_data/average_colors/stylegan3-official
-generated_data/average_colors/stylegan3-official: get_average_colors.py
+COLOR_DATA_OUT_DIR := generated_data/average_colors
+${COLOR_DATA_OUT_DIR}/ffhq_test: get_average_colors.py
 	mkdir -p $(COLOR_DATA_OUT_DIR)
 	@for model_file in $(shell find  ${MODELS_DIR}/stylegan3-official -type f -printf "%f\n") ; do \
-		echo Creating $(COLOR_DATA_OUT_DIR)/ffhq_test_$${model_file}.csv ; \
+		echo Creating $(COLOR_DATA_OUT_DIR)/ffhq_test/ffhq_test_$${model_file}.csv ; \
 		python get_average_colors.py \
 		--images_dir $(FFHQ_IMAGES_DIR) \
-		--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test_$${model_file}.csv \
+		--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test/ffhq_test_$${model_file}.csv \
 		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ; \
-		rmdir $(COLOR_DATA_OUT_DIR) ; done
-	mkdir -p ../ganfaces/data/color_data/
-	cp $(COLOR_DATA_OUT_DIR)/ffhq_test_*.csv ../gan_faces/data/color_data
+		rmdir $(COLOR_DATA_OUT_DIR)/ffhq_test ; done
+	mkdir -p ../ganfaces/data/color_data/ffhq_test
+	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test ../gan_faces/data/color_data
 
 
+${COLOR_DATA_OUT_DIR}/fairface_test: get_average_colors.py
+	mkdir -p $(COLOR_DATA_OUT_DIR)
+	@for model_file in $(shell find  ${MODELS_DIR}/stylegan3-official -type f -printf "%f\n") ; do \
+		echo Creating $(COLOR_DATA_OUT_DIR)/fairface_test/fairface_test_$${model_file}.csv ; \
+		python get_average_colors.py \
+		--images_dir $(FAIRFACE_IMAGES_DIR) \
+		--dest_csv $(COLOR_DATA_OUT_DIR)/fairface_test/fairface_test_$${model_file}.csv \
+		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ; \
+		rmdir $(COLOR_DATA_OUT_DIR)/fairface_test ; done
+	mkdir -p ../ganfaces/data/color_data/fairface_test
+	cp -R $(COLOR_DATA_OUT_DIR)/fairface_test ../gan_faces/data/color_data/
+
+
+${COLOR_DATA_OUT_DIR}: ${COLOR_DATA_OUT_DIR}/fairface_test ${COLOR_DATA_OUT_DIR}/ffhq_test
+	echo "Generating color CSVs with FFHQ and FairFace images."
 
 ffhq_prepare_512:
 	mkdir -p $(IMAGES_ROOT_DIR)/ffhq_processed_512x512
