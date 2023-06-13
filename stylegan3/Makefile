@@ -78,21 +78,21 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test: get_average_colors.py
 		python get_average_colors.py \
 		--images_dir $(FFHQ_IMAGES_DIR) \
 		--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test/ffhq_test_$${model_file}.csv \
-		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ;
+		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ; done
 	mkdir -p ../ganfaces/data/color_data/ffhq_test
-	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test ../gan_faces/data/color_data
+	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test ../ganfaces/data/color_data
 
 
-${COLOR_DATA_OUT_DIR}/fairface_test: get_average_colors.py
+${COLOR_DATA_OUT_DIR}/fairface_test: get_average_colors.py ${COLOR_DATA_OUT_DIR}/fairface_test/fairface_model
 	mkdir -p $(COLOR_DATA_OUT_DIR)/fairface_test
 	@for model_file in $(shell find  ${MODELS_DIR}/stylegan3-official -type f -printf "%f\n") ; do \
 		echo Creating $(COLOR_DATA_OUT_DIR)/fairface_test/fairface_test_$${model_file}.csv ; \
 		python get_average_colors.py \
 		--images_dir $(FAIRFACE_IMAGES_DIR) \
 		--dest_csv $(COLOR_DATA_OUT_DIR)/fairface_test/fairface_test_$${model_file}.csv \
-		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ; 
+		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ; done
 	mkdir -p ../ganfaces/data/color_data/fairface_test
-	cp -R $(COLOR_DATA_OUT_DIR)/fairface_test ../gan_faces/data/color_data/
+	cp -R $(COLOR_DATA_OUT_DIR)/fairface_test ../ganfaces/data/color_data/
 
 FAIRFACE_STYLEGANT_FINAL_MODEL := /mnt/data/students/models/fairface_stylegan3/training-runs/00007-stylegan3-t-train_prepared-gpus8-batch32-gamma8.2/network-snapshot-025000.pkl
 FAIRFACE_STYLEGANR_FINAL_MODEL := $(MODELS_DIR)/fairface_stylegan3/training-runs/00012-stylegan3-r-train_prepared-gpus8-batch32-gamma8.2/network-snapshot-025000.pkl
@@ -119,13 +119,13 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test/fairface_model: get_average_colors.py
 	--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test/fairface_model/ffhq_test_fairface_stylegan3r_25000.csv \
 	--gan_model ${FAIRFACE_STYLEGANR_FINAL_MODEL} \
 	--model_dimensions 512x512
-	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test/fairface_model ../gan_faces/data/color_data/
+	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test/fairface_model ../ganfaces/data/color_data/
 	python get_average_colors.py \
 	--images_dir $(FFHQ_IMAGES_DIR) \
 	--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test/fairface_model/ffhq_test_fairface_stylegan3t_25000.csv \
 	--gan_model ${FAIRFACE_STYLEGANT_FINAL_MODEL}  \
 	--model_dimensions 512x512
-	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test/fairface_model ../gan_faces/data/color_data/
+	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test/fairface_model ../ganfaces/data/color_data/
 
 
 
