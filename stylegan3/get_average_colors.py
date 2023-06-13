@@ -84,7 +84,9 @@ def main():
     parser = argparse.ArgumentParser(description='Generate CSV file with RGB and luminance values.')
     parser.add_argument('--images_dir', type=str,help="root directory of processed images")
     parser.add_argument('--dest_csv', type=str, help="full path and filename of the destination CSV file.")
-    parser.add_argument('--gan_model', type=str, help="file name of GAN model to use.  Assumes last part of name (before .pkl) is the width and height of the images in the modal, e.g., my_model256x256.pkl.")
+    parser.add_argument('--gan_model', type=str, help="file name of GAN model to use. Either must include --model_dimensions flag or assumes last part of name (before .pkl) is the width and height of the images in the modal, e.g., my_model256x256.pkl.")
+    parser.add_argument('--model_dimensions', type=str, required=False, help="Optional: dimensions of the images used to train the model, e.g., 1024x1024.  Currently must be the same for width and height.  If not specified, must be part of the file name.")
+
     #parser.add_argument('--resize', type=int, nargs=1, required=False, default=None,help="Optionally resize images to this height while maintaining aspect ratio..  For example: --resize 1024")
     
     args = parser.parse_args()
@@ -94,8 +96,14 @@ def main():
     #resize = args.resize
     ### find dimensions use by model for resizing
     model_prefix = os.path.splitext(args.gan_model)[0]
-    model_image_height = int(model_prefix.split('x')[1])
+
+    model_image_height =  None
+    if args.model_dimensions is None:
+        model_image_height = int(model_prefix.split('x')[1])
+    else:
+        model_image_height = int(args.model_dimensions.split('x')[0])
     dimensions = (model_image_height, model_image_height)
+    print("Dimensions:",dimensions)
     
     process_images(images_dir, discriminator, out_csv_filename, model_image_height)
     end_time = time.time()
