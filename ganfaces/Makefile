@@ -32,6 +32,30 @@ results/figures/fairface_color_histogram_ffhq_stylegan3r_model_logscale.pdf:
 	catimg results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.jpg
 
 
+#UNFINISHED
+HIST_DIR = results/figures/histograms
+COLOR_DATA_DIR = data/color_data
+${HIST_DIR}:
+	mkdir -p $(HIST_DIR)
+	@for csv in $(shell find data/color_data/fairface_test/ -type f -printf "%f\n") ; do \
+		python scripts/color_histogram.py --input_csv ${COLOR_DATA_DIR}/fairface_test/$${csv} --output_filename ${HIST_DIR}/$${csv} --num_bins=15 ; \
+		inkscape ${HIST_DIR}/$${csv}_color_histogram_logscale.svg --export-type=pdf --export-filename=${HIST_DIR}/$${csv}_color_histogram_logscale.pdf ; \
+		catimg ${HIST_DIR}/$${csv}_color_histogram_logscale.jpg ; done
+
+
+
+# python scripts/color_histogram.py --input_csv data/fairface_data_ffhq_stylegan3r_model.csv --output_filename results/figures/fairface_color_ffhq_stylegan3r_model --num_bins=15
+# inkscape results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.svg --export-type=pdf --export-filename=results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.pdf
+# catimg results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.jpg
+
+
+# results/figures/histograms: 
+# 	mkdir -p results/figures
+# 	python scripts/color_histogram.py --input_csv data/fairface_data_ffhq_stylegan3r_model.csv --output_filename results/figures/fairface_color_ffhq_stylegan3r_model --num_bins=15
+# 	inkscape results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.svg --export-type=pdf --export-filename=results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.pdf
+# 	catimg results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.jpg
+
+
 
 results/figures/fairface_data_ffhq_stylegan3r_model_luminance_hdr.pdf: scripts/luminance_hdr.R
 	mkdir -p results/figures
