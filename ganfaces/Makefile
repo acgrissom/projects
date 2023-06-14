@@ -32,15 +32,65 @@ results/figures/fairface_color_histogram_ffhq_stylegan3r_model_logscale.pdf:
 	catimg results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.jpg
 
 
+COLOR_DATA_DIR := data/color_data
+FIGURES_DIR := results/figures
+LUMINANCE_FIG_DIR := ${FIGURES_DIR}/luminance
 #UNFINISHED
-HIST_DIR = results/figures/histograms
-COLOR_DATA_DIR = data/color_data
-${HIST_DIR}:
+${LUMINANCE_FIG_DIR}: scripts/luminance_hdr.R
+	mkdir -p ${LUMINANCE_FIG_DIR}
+	@for csv in $(shell find ${COLOR_DATA_DIR}/fairface_test -maxdepth 1 -type f -printf "%f\n") ; do \
+		Rscript scripts/luminance_hdr.R ${COLOR_DATA_DIR}/fairface_test/$${csv} ${LUMINANCE_FIG_DIR}/`basename $$csv .csv` ;\
+		inkscape ${LUMINANCE_FIG_DIR}/`basename $$csv .csv`_luminance_hdr.svg --export-type=pdf --export-filename=${LUMINANCE_FIG_DIR}/`basename $$csv .csv`_luminance_hdr.pdf ;\
+		done
+#catimg ${LUMINANCE_FIG_FIR}/`subst .pkl ${} $$csv`_luminance_hdr.jpg ;\
+
+
+
+
+HIST_DIR = ${FIGURES_DIR}/histograms
+
+
+${HIST_DIR}: ${HIST_DIR}/fairface_test ${HIST_DIR}/ffhq_test 
+	mkdir -p ${HIST_DIR}
+
+${HIST_DIR}/fairface_test: scripts/color_histogram.py
 	mkdir -p $(HIST_DIR)
-	@for csv in $(shell find data/color_data/fairface_test/ -type f -printf "%f\n") ; do \
+	@for csv in $(shell find ${COLOR_DATA_DIR}/fairface_test/ -maxdepth 1 -type f -printf "%f\n") ; do \
+		echo $${csv} ;\
 		python scripts/color_histogram.py --input_csv ${COLOR_DATA_DIR}/fairface_test/$${csv} --output_filename ${HIST_DIR}/$${csv} --num_bins=15 ; \
-		inkscape ${HIST_DIR}/$${csv}_color_histogram_logscale.svg --export-type=pdf --export-filename=${HIST_DIR}/$${csv}_color_histogram_logscale.pdf ; \
-		catimg ${HIST_DIR}/$${csv}_color_histogram_logscale.jpg ; done
+		inkscape ${HIST_DIR}/`basename $$csv .csv`_color_histogram_logscale.svg --export-type=pdf --export-filename=${HIST_DIR}/`basename $$csv .csv`_color_histogram_logscale.pdf ; \
+		 catimg ${HIST_DIR}/`basename $$csv .csv`_color_histogram_logscale.jpg ; \
+		done
+
+
+# ${HIST_DIR}/fairface_test/fairface_model:
+# 	mkdir -p $(HIST_DIR)
+# 	@for csv in $(shell find ${COLOR_DATA_DIR}/fairface_test/fairface_model -maxdepth 1 -type f -printf "%f\n") ; do \
+# 		echo ${COLOR_DATA_DIR}/fairface_test/fairface_model/$${csv} ;\
+# 		python scripts/color_histogram.py --input_csv ${COLOR_DATA_DIR}/fairface_test/fairface_model/$${csv} --output_filename ${HIST_DIR}/$${csv} --num_bins=15 ; \
+# 		inkscape ${HIST_DIR}/`basename $$csv .csv`_color_histogram_logscale.svg --export-type=pdf --export-filename=${HIST_DIR}/$${csv}_color_histogram_logscale.pdf ; \
+# 		 catimg ${HIST_DIR}/$${csv}_color_histogram_logscale.jpg ; \
+# 		done
+
+
+${HIST_DIR}/ffhq_test: #${HIST_DIR}/ffhq_test/fairface_model
+	mkdir -p $(HIST_DIR)
+	@for csv in $(shell find ${COLOR_DATA_DIR}/ffhq_test/ -type f -maxdepth 1 -printf "%f\n") ; do \
+		echo $${csv} ;\
+		python scripts/color_histogram.py --input_csv ${COLOR_DATA_DIR}/ffhq_test/$${csv} --output_filename ${HIST_DIR}/$${csv} --num_bins=15 ; \
+		inkscape ${HIST_DIR}/`basename $$csv .csv`_color_histogram_logscale.svg --export-type=pdf --export-filename=${HIST_DIR}/$${csv}_color_histogram_logscale.pdf ; \
+		 catimg ${HIST_DIR}/`basename $$csv .csv`_color_histogram_logscale.jpg ; \
+		done
+
+
+# ${HIST_DIR}/ffhq_test/fairface_model:
+# 	mkdir -p $(HIST_DIR)
+# 	@for csv in $(shell find ${COLOR_DATA_DIR}/ffhq_test/fairface_model -maxdepth 1 -type f  -printf "%f\n") ; do \
+# 		echo $${csv} ;\
+# 		python scripts/color_histogram.py --input_csv ${COLOR_DATA_DIR}/ffhq_test/fairface_model/$${csv} --output_filename ${HIST_DIR}/$${csv} --num_bins=15 ; \
+# 		inkscape ${HIST_DIR}/`basename $$csv .csv`_color_histogram_logscale.svg --export-type=pdf --export-filename=${HIST_DIR}/$${csv}_color_histogram_logscale.pdf ; \
+# 		 catimg ${HIST_DIR}/$${csv}_color_histogram_logscale.jpg ; \
+# 		done
 
 
 
@@ -57,11 +107,6 @@ ${HIST_DIR}:
 
 
 
-results/figures/fairface_data_ffhq_stylegan3r_model_luminance_hdr.pdf: scripts/luminance_hdr.R
-	mkdir -p results/figures
-	Rscript scripts/luminance_hdr.R data/fairface_data_ffhq_stylegan3r_model.csv results/figures/fairface_data_ffhq_stylegan3r_model
-	inkscape results/figures/fairface_data_ffhq_stylegan3r_model_luminance_hdr.svg --export-type=pdf --export-filename=results/figures/fairface_data_ffhq_stylegan3r_model_luminance_hdr.pdf
-	catimg results/figures/fairface_data_ffhq_stylegan3r_model_luminance_hdr.jpg
 
 
 

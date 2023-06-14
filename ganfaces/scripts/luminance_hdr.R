@@ -13,14 +13,14 @@ if (length(args) < 2) {
 } else if (length(args) == 1) {
                                         # default output file
     csv_full_path = args[1]
-    output_full_path = "results/figures/" + tools::file_path_sans_ext(output_filename(csv_full_path)) + ".svg"
+    output_full_path + tools::file_path_sans_ext(output_filename(csv_full_path)) + ".svg"
 } else if(length(args) == 2) {
     csv_full_path = args[1]
     output_full_path = args[2]
 }
 
 output_filename = basename(output_full_path)
-output_full_path_no_extension = tools::file_path_sans_ext(output_full_path)
+#output_full_path_no_extension = tools::file_path_sans_ext(output_full_path)
 
 
 
@@ -46,10 +46,10 @@ p_hdr_points <- ggplot(data, aes(x=luminance, y=scores_rgb, xlab="Luminance", yl
 
 #ggsave("results/figures/luminance_hdr.svg")
 #ggsave("results/figures/luminance_hdr.jpg")
-output_hdr_svg = paste(output_full_path_no_extension, "_luminance_hdr.svg", sep="")
+output_hdr_svg = paste(output_full_path, "_luminance_hdr.svg", sep="")
 print(paste("Writing", output_hdr_svg))
-ggsave(paste(output_full_path_no_extension, "_luminance_hdr.svg", sep=""))
-ggsave(paste(output_full_path_no_extension, "_luminance_hdr.jpg", sep=""))
+ggsave(paste(output_full_path, "_luminance_hdr.svg", sep=""))
+ggsave(paste(output_full_path, "_luminance_hdr.jpg", sep=""))
 
 luminance_dists <- ggplot(data, aes(x=luminance)) +
     xlab("Luminance") +  
@@ -59,8 +59,8 @@ luminance_dists <- ggplot(data, aes(x=luminance)) +
 #ggsave("results/figures/luminance_dist.svg")
                                         #ggsave("results/figures/luminance_dist.jpg")
 
-output_hdr_dist = paste(output_full_path_no_extension, "_luminance_hdr.svg", sep="")
+output_hdr_dist = paste(output_full_path, "_luminance_hdr.svg", sep="")
 print(paste("Writing", output_hdr_dist))
 
-ggsave(paste(output_full_path_no_extension, "_luminance_dist.svg", sep=""))
-ggsave(paste(output_full_path_no_extension, "_luminance_dist.jpg", sep=""))
+ggsave(paste(output_full_path, "_luminance_dist.svg", sep=""))
+ggsave(paste(output_full_path, "_luminance_dist.jpg", sep=""))
