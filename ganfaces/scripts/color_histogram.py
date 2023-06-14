@@ -207,7 +207,9 @@ if __name__ == "__main__":
     NUM_BINS = args.num_bins
     OUT_DIR = os.path.dirname(args.output_filename)
     filename_prefix = Path(args.output_filename).stem
-    df = load_data(args.input_csv)
+    print("Opening", args.input_csv)
+    print("Outputting to", OUT_DIR)
+    df = load_data(args.input_csv.strip())
     append_hex_colors(df)
     plot_scatter(df, filename_prefix)
     seaborn_plot_histogram_bin_by_score(df, filename_prefix, num_bins=NUM_BINS)
