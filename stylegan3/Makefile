@@ -171,6 +171,18 @@ ffhq_train_512:
 	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs
 	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-t
 
+
+ffhq_train_128_stylegan3t:
+	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs/128x128
+	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs/128x128 --data=$(IMAGES_ROOT_DIR)/ffhq_processed_128x128 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-t
+
+
+ffhq_train_128_stylegan3r:
+	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs/128x128
+	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs/128x128 --data=$(IMAGES_ROOT_DIR)/ffhq_processed_128x128 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-r
+
+
+
 fairface_train_stylegan3t:	
 	mkdir -p /mnt/data/students/models/fairface_stylegan3t/training-runs
 	python train.py --outdir=/mnt/data/students/models/fairface_stylegan3/training-runs --cfg=stylegan3-t --data=/mnt/data/students/fairface/data/padding_0.25/train_prepared --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5
