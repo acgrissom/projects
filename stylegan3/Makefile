@@ -93,6 +93,8 @@ ${COLOR_DATA_OUT_DIR}/fairface_test: get_average_colors.py ${COLOR_DATA_OUT_DIR}
 		--gan_model $(MODELS_DIR)/stylegan3-official/$${model_file} ; done
 	mkdir -p ../ganfaces/data/color_data/fairface_test
 	cp -R $(COLOR_DATA_OUT_DIR)/fairface_test ../ganfaces/data/color_data/
+	mv ../ganfaces/data/color_data/fairface_test/fairface_model/*.csv ../ganfaces/data/color_data/fairface_test/
+	rmdir ../ganfaces/data/color_data/fairface_test/fairface_model
 
 FAIRFACE_STYLEGANT_FINAL_MODEL := /mnt/data/students/models/fairface_stylegan3/training-runs/00007-stylegan3-t-train_prepared-gpus8-batch32-gamma8.2/network-snapshot-025000.pkl
 FAIRFACE_STYLEGANR_FINAL_MODEL := $(MODELS_DIR)/fairface_stylegan3/training-runs/00012-stylegan3-r-train_prepared-gpus8-batch32-gamma8.2/network-snapshot-025000.pkl
@@ -126,6 +128,9 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test/fairface_model: get_average_colors.py
 	--gan_model ${FAIRFACE_STYLEGANT_FINAL_MODEL}  \
 	--model_dimensions 512x512
 	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test/fairface_model ../ganfaces/data/color_data/
+	mv ../ganfaces/data/color_data/ffhq_test/fairface_model/*.csv ../ganfaces/data/color_data/ffhq_test/
+	rmdir ../ganfaces/data/color_data/ffhq_test/fairface_model
+
 
 
 
