@@ -147,6 +147,14 @@ ffhq_prepare_512:
 	--dest $(IMAGES_ROOT_DIR)/ffhq_processed_512x512 \
 	--resolution=512x512
 
+ffhq_prepare_128:
+	mkdir -p $(IMAGES_ROOT_DIR)/ffhq_processed_128x128
+	python dataset_tool.py \
+	--source $(IMAGES_ROOT_DIR)/ffhq_images_1024x1024 \
+	--dest $(IMAGES_ROOT_DIR)/ffhq_processed_128x128 \
+	--resolution=128x128
+
+
 #fairface_clean:
 #	rm -R $(MODELS_DIR)/fairface_stylegan3t/training-runs
 
