@@ -99,7 +99,7 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test_128: get_average_colors.py
 		echo Reading $${model_file} ; \
 		python get_average_colors.py \
 		--images_dir $(FFHQ_IMAGES_DIR_128) \
-		--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test_128/ffhq_test_$${model_file}.csv \
+		--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test_128/ffhq_test_${snapshot_subdir}_$${model_file}.csv \
 		--gan_model ${snapshots_path}/$${model_file} \
 		--model_dimensions 128x128 ; done
 	mkdir -p ../ganfaces/data/color_data/ffhq_test_128
