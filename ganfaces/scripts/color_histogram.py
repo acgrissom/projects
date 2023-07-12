@@ -6,7 +6,7 @@ import seaborn as sns
 import os
 from pathlib import Path
 import argparse
-
+import glob
 Path('/root/dir/sub/file.ext').stem
 OUT_DIR = 'results/figures/'
 def load_data(filename='data/correct_LAB_format_images_data.csv'):
@@ -22,7 +22,7 @@ def append_hex_colors(df):
         hex_list.append(hex_val)
     df['color_mean'] = hex_list
 
-def plot_scatter(df, filename_prefix) -> tuple:
+def plot_scatter(df, filename_prefix, out_dir=OUT_DIR, save_file=True) -> tuple:
     plot = plt.figure(figsize=(7,7))
     plt.style.use('ggplot')
     plt.scatter(df.luminance, df.scores_rgb, c=df.color_mean, alpha=0.6, marker='s')
@@ -30,8 +30,9 @@ def plot_scatter(df, filename_prefix) -> tuple:
     plt.ylabel("Score", fontsize=12)
 
     #plt.savefig(OUT_DIR + 'training_color_scatter.svg') #takes too long/too big
-    plt.savefig(OUT_DIR + "/" +  filename_prefix + '_color_scatter.jpg')
-    plt.savefig(OUT_DIR + "/" + filename_prefix + '_color_scatter.png', dpi=100)
+    if save_file == True:
+        plt.savefig(out_dir + "/" +  filename_prefix + '_color_scatter.jpg')
+        plt.savefig(out_dir + "/" + filename_prefix + '_color_scatter.png', dpi=100)
     return plot
 
 
@@ -114,7 +115,7 @@ def plot_histogram_bin_by_color(df, num_bins=6):
     cluster_colors = find_cluster_colors(df)
     
 
-def plot_histogram_bin_by_score(df, num_bins=6):
+def plot_histogram_bin_by_score(df, num_bins=6, out_dir=OUT_DIR, save_file=True):
     bin_colors  = find_average_color_by_bin(df, num_bins)
     plt.figure(figsize=(7, 7))
     plt.tick_params(labelleft=False, left=False)
@@ -130,13 +131,17 @@ def plot_histogram_bin_by_score(df, num_bins=6):
     #plt.bar(range(num_bins), [5]*num_bins, color=bin_colors)
     #plt.legend(loc="lower left")
     #plt.legend(labelcolor='black')
-
-                 
-    plt.savefig(OUT_DIR + 'training_color_histogram_logscale.svg')
-    plt.savefig(OUT_DIR + 'training_color_histogram_logscale.jpg')
+    if save_file == True:
+        plt.savefig(out_dir + 'training_color_histogram_logscale.svg')
+        plt.savefig(out_dir + 'training_color_histogram_logscale.jpg')
+    return plot
     
 
-def seaborn_plot_histogram_bin_by_score(df, filename_prefix, num_bins=6):
+def seaborn_plot_histogram_bin_by_score(df,
+                                        filename_prefix,
+                                        num_bins=6,
+                                        out_dir=OUT_DIR,
+                                        save_file=True):
     plt.style.use('ggplot')
     plt.figure(figsize=(7 , 7))
     bin_colors  = find_average_color_by_bin(df, num_bins)
@@ -154,10 +159,10 @@ def seaborn_plot_histogram_bin_by_score(df, filename_prefix, num_bins=6):
     #plt.bar(range(num_bins), [5]*num_bins, color=bin_colors)
     #plt.legend(loc="lower left")
     #plt.legend(labelcolor='black')
-
-                 
-    plt.savefig(OUT_DIR + "/" + filename_prefix + "_color_histogram_logscale.svg")
-    plt.savefig(OUT_DIR + "/" + filename_prefix + "_color_histogram_logscale.jpg")
+    
+    if(save_file == True):
+        plt.savefig(out_dir + "/" + filename_prefix + "_color_histogram_logscale.svg")
+        plt.savefig(out_dir + "/" + filename_prefix + "_color_histogram_logscale.jpg")
 
 
 """Doesn't work."""
@@ -195,7 +200,10 @@ def make_marginal_hexplot(df, num_bins=6):
    # plt.savefig('marginal.svg')
    # plt.savefig('marginal.png')
 
+
     
+    
+   
 if __name__ == "__main__":
    #themes.theme_minimal()
     parser = argparse.ArgumentParser(
