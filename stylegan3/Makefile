@@ -91,8 +91,10 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test: get_average_colors.py
 	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test ../ganfaces/data/color_data
 
 
-${COLOR_DATA_OUT_DIR}/ffhq_test_128: snapshot_sudbdir=00005-stylegan3-r-ffhq_processed_128x128-gpus8-batch32-gamma8.2
-${COLOR_DATA_OUT_DIR}/ffhq_test_128: snapshots_path=$(MODELS_DIR)/ffhq_stylegan3t/training-runs/128x128/00005-stylegan3-r-ffhq_processed_128x128-gpus8-batch32-gamma8.2
+#FFHQ_STYLEGANR_FINAL_MODEL := $(MODELS_DIR)/ffhq_stylegan3t/training-runs/128x128/00007-stylegan3-r-ffhq_processed_128x128-gpus8-batch32-gamma8.2/
+#${COLOR_DATA_OUT_DIR}/ffhq_test_128: snapshot_subdir=00005-stylegan3-r-ffhq_processed_128x128-gpus8-batch32-gamma8.2
+${COLOR_DATA_OUT_DIR}/ffhq_test_128: snapshot_subdir=00007-stylegan3-r-ffhq_processed_128x128-gpus8-batch32-gamma8.2
+${COLOR_DATA_OUT_DIR}/ffhq_test_128: snapshots_path=${MODELS_DIR}/ffhq_stylegan3t/training-runs/128x128/${snapshot_subdir}
 ${COLOR_DATA_OUT_DIR}/ffhq_test_128: get_average_colors.py 
 	mkdir -p $(COLOR_DATA_OUT_DIR)/ffhq_test_128
 	@for model_file in $(shell find ${snapshots_path}/*000.pkl -type f -printf "%f\n") ; do \
@@ -194,6 +196,11 @@ ffhq_train_512:
 	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs
 	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-t
 
+ffhq_train_512_stylegan3r:
+	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs
+	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-r
+
+
 
 ffhq_train_128_stylegan3t:
 	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs/128x128
@@ -229,4 +236,4 @@ ffhq_train_stylegan3t:
 
 
 rsync_data:
-	rsync -r /mnt/data/students /share/kuran/data/nurvus_sync
+	rsync -rv /mnt/data/students /share/kuran/data/nurvus_sync
