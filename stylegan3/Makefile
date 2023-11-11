@@ -78,6 +78,10 @@ ffhq_color_data_ffhq_stylegan3r_model.csv: get_average_colors.py
 	--gan_model $(MODELS_DIR)/stylegan3-official/stylegan3-r-ffhq-1024x1024.pkl #--resize 1024
 
 
+
+
+
+
 COLOR_DATA_OUT_DIR := generated_data/average_colors
 ${COLOR_DATA_OUT_DIR}/ffhq_test: get_average_colors.py
 	mkdir -p $(COLOR_DATA_OUT_DIR)/ffhq_test
@@ -91,9 +95,14 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test: get_average_colors.py
 	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test ../ganfaces/data/color_data
 
 
+
+
+
+
 #FFHQ_STYLEGANR_FINAL_MODEL := $(MODELS_DIR)/ffhq_stylegan3t/training-runs/128x128/00007-stylegan3-r-ffhq_processed_128x128-gpus8-batch32-gamma8.2/
 #${COLOR_DATA_OUT_DIR}/ffhq_test_128: snapshot_subdir=00005-stylegan3-r-ffhq_processed_128x128-gpus8-batch32-gamma8.2
 ${COLOR_DATA_OUT_DIR}/ffhq_test_128: snapshot_subdir=00007-stylegan3-r-ffhq_processed_128x128-gpus8-batch32-gamma8.2
+#${COLOR_DATA_OUT_DIR}/ffhq_test_128: snapshot_subdir=00007-stylegan3-r-ffhq_processed_128x128-gpus8-batch32-gamma8.2
 ${COLOR_DATA_OUT_DIR}/ffhq_test_128: snapshots_path=${MODELS_DIR}/ffhq_stylegan3t/training-runs/128x128/${snapshot_subdir}
 ${COLOR_DATA_OUT_DIR}/ffhq_test_128: get_average_colors.py 
 	mkdir -p $(COLOR_DATA_OUT_DIR)/ffhq_test_128
@@ -106,6 +115,32 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test_128: get_average_colors.py
 		--model_dimensions 128x128 ; done
 	mkdir -p ../ganfaces/data/color_data/ffhq_test_128
 	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test_128 ../ganfaces/data/color_data/
+
+
+
+
+#FFHQ_STYLEGANR_FINAL_MODEL := $(MODELS_DIR)/ffhq_stylegan3t/training-runs/
+#${COLOR_DATA_OUT_DIR}/ffhq_test_512: snapshot_subdir=00000-stylegan3-t-ffhq_processed_512x512-gpus8-batch32-gamma8.2
+#${COLOR_DATA_OUT_DIR}/ffhq_test_512: snapshot_subdir=00133-stylegan3-r-ffhq_processed_512x512-gpus8-batch32-gamma8.2
+
+${COLOR_DATA_OUT_DIR}/ffhq_test_512: snapshot_subdir=00135-stylegan3-r-ffhq_processed_512x512-gpus8-batch32-gamma8.2
+
+${COLOR_DATA_OUT_DIR}/ffhq_test_512: snapshots_path=${MODELS_DIR}/ffhq_stylegan3t/training-runs/${snapshot_subdir}
+${COLOR_DATA_OUT_DIR}/ffhq_test_512: get_average_colors.py 
+	mkdir -p $(COLOR_DATA_OUT_DIR)/ffhq_test_512
+	@for model_file in $(shell find ${snapshots_path}/*000.pkl -type f -printf "%f\n") ; do \
+		echo Reading $${model_file} ; \
+		python get_average_colors.py \
+		--images_dir $(FFHQ_IMAGES_DIR) \
+		--dest_csv $(COLOR_DATA_OUT_DIR)/ffhq_test_512/ffhq_test_${snapshot_subdir}_$${model_file}.csv \
+		--gan_model ${snapshots_path}/$${model_file} \
+		--model_dimensions 512x512 ; done
+	mkdir -p ../ganfaces/data/color_data/ffhq_test_512
+	cp -R $(COLOR_DATA_OUT_DIR)/ffhq_test_512 ../ganfaces/data/color_data/
+
+
+
+
 
 
 ${COLOR_DATA_OUT_DIR}/fairface_test: get_average_colors.py ${COLOR_DATA_OUT_DIR}/fairface_test/fairface_model
@@ -192,14 +227,18 @@ fairface_train:
 #	rm -R $(MODELS_DIR)/ffhq_stylegan3t/training-runs
 # Deleted this target because it's too dangerous.
 
-ffhq_train_512:
+ffhq_train_512_stylegant:
 	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs
 	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-t
 
 ffhq_train_512_stylegan3r:
 	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs
-	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-r
+	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-r --seed 2
 
+
+ffhq_train_512_stylegan3r_resume_latest:
+	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs
+	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-r --resume=latest
 
 
 ffhq_train_128_stylegan3t:
