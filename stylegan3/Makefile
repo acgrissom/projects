@@ -233,7 +233,7 @@ ffhq_train_512_stylegant:
 
 ffhq_train_512_stylegan3r:
 	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs
-	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-r --seed 2
+	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-r --seed 4
 
 
 ffhq_train_512_stylegan3r_resume_latest:

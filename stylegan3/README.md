@@ -1,3 +1,12 @@
+To get diachronic plots:
+
+1.  Train model after setting random seed.
+2.  Modify the Makefile variable: COLOR_DATA_OUT_DIR to point to the new model
+3.  Run :
+
+make -B generated_data/average_colors/ffhq_test_512
+
+Random seeds start a 0 and increase by 1, where 139 is 2.
 Code adopted from Nvidia StyleGan3 Implementation: [https://github.com/NVlabs/stylegan3](https://github.com/NVlabs/stylegan3)
 
 # Documentation
