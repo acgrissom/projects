@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import argparse
 import glob
+import logging
 Path('/root/dir/sub/file.ext').stem
 OUT_DIR = 'results/figures/'
 def load_data(filename='data/correct_LAB_format_images_data.csv'):
@@ -82,9 +83,12 @@ def find_score_average_color(df, num_clusters=6) -> dict:
 Returns a list of hex values with avearge color, one for each bin.
 """
 def find_average_color_by_bin(df, num_bins) -> list:
+    logging.info("find_average_color_by_bin()")
+    logging.info("num_bins " + str(num_bins))
     bin_colors = list()
     labels = range(num_bins)
     df['score_bin'] = pd.cut(df['scores_rgb'], bins=num_bins, labels=labels)
+    logging.info("df head after binning:\n" + df.to_string(max_rows=10))
     for bin_num in labels:
         current_bin = df.loc[df['score_bin'] == bin_num]
         bin_red = round(current_bin['red_mean'].mean())
@@ -142,6 +146,10 @@ def seaborn_plot_histogram_bin_by_score(df,
                                         num_bins=6,
                                         out_dir=OUT_DIR,
                                         save_file=True):
+    logging.info("CSV scores_rgb_hasnull::"+str(df['scores_rgb'].isnull().values.any()))
+    logging.info("CSV red_mean_hasnull::"+str(df['red_mean'].isnull().values.any()))
+    logging.info("CSV green_mean_hasnull::"+str(df['green_mean'].isnull().values.any()))
+    logging.info("CSV blue_mean_hasnull::"+str(df['blue_mean'].isnull().values.any()))
     plt.style.use('ggplot')
     plt.figure(figsize=(7 , 7))
     bin_colors  = find_average_color_by_bin(df, num_bins)
@@ -163,6 +171,7 @@ def seaborn_plot_histogram_bin_by_score(df,
     if(save_file == True):
         plt.savefig(out_dir + "/" + filename_prefix + "_color_histogram_logscale.svg")
         plt.savefig(out_dir + "/" + filename_prefix + "_color_histogram_logscale.jpg")
+    return plot
 
 
 """Doesn't work."""

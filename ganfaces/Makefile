@@ -21,13 +21,13 @@ results/figures/training_color_histogram_logscale.pdf:
 
 results/figures/fairface_color_histogram_logscale.pdf:
 	mkdir -p results/figures
-	python scripts/color_histogram.py --input_csv data/fairface_data.csv --output_filename results/figures/fairface --num_bins=10
+	python scripts/color_histogram.py --input_csv data/fairface_data.csv --output_filename results/figures/fairface --num_bins=6
 	inkscape results/figures/fairface_color_histogram_logscale.svg --export-type=pdf --export-filename=results/figures/fairface_color_histogram_logscale.pdf
 	catimg results/figures/fairface_color_histogram_logscale.jpg
 
 results/figures/fairface_color_histogram_ffhq_stylegan3r_model_logscale.pdf:
 	mkdir -p results/figures
-	python scripts/color_histogram.py --input_csv data/fairface_data_ffhq_stylegan3r_model.csv --output_filename results/figures/fairface_color_ffhq_stylegan3r_model --num_bins=15
+	python scripts/color_histogram.py --input_csv data/fairface_data_ffhq_stylegan3r_model.csv --output_filename results/figures/fairface_color_ffhq_stylegan3r_model --num_bins=12
 	inkscape results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.svg --export-type=pdf --export-filename=results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.pdf
 	catimg results/figures/fairface_color_ffhq_stylegan3r_model_color_histogram_logscale.jpg
 
@@ -208,6 +208,15 @@ results/figures/ordinal_posteriors.pdf: scripts/race_hair_linear_regression.py
 	inkscape results/figures/ordinal_posteriors.svg --export-type=pdf --export-filename=results/figures/ordinal_posteriors.pdf
 	catimg results/figures/ordinal_posteriors.jpg
 
+
+results/figures/histograms/diachronic/128x128:
+	python scripts/colors_histogram_over_time.py -i  data/color_data/ffhq_test_128/ -o results/figures/histograms/diachronic/128x128
+
+results/figures/histograms/diachronic/512x512:
+	mkdir -p logs
+	rm -f logs/*.log
+	mkdir -p results/figures/histograms/diachronic/512x512
+	python scripts/colors_histogram_over_time.py --num_bins=10 -i  data/color_data/ffhq_test_512/ -o results/figures/histograms/diachronic/512x512
 
 
 results/figures:  results/figures/training_color_histogram_logscale.pdf results/figures/training_color_scatter.png scripts/color_histogram.py results/figures/ffhq_luminance_hdr.pdf results/figures/fairface_luminance_hdr.pdf results/figures/atypical_all_50face_dist.pdf results/figures/red_skin_grid.pdf results/figures/ffhq_color_histogram_logscale.pdf results/figures/fairface_color_histogram_logscale.pdf
