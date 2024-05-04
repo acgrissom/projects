@@ -1,4 +1,5 @@
 install_packages:
+	sudo apt install libfontconfig1-dev libcairo2-dev
 	Rscript packages.R
 
 new.csv:change_csv.py replace_long_names.sh
