@@ -13,6 +13,10 @@ linux_packages: pip_packages
 r_packages: 
 	Rscript scripts/install_r_prereqs.R
 
+#in-progress placeholder
+faceted_test.png:
+	python scripts/colors_histogram_over_time.py -i  data/color_data/ffhq_test_512/ -o results/figures/histograms/diachronic/512x512 -s 1000 -f 0 -l 25000 -c True -r  135 139 140
+
 results/figures/training_color_histogram_logscale.pdf:
 	mkdir -p results/figures
 	python scripts/color_histogram.py
@@ -216,7 +220,7 @@ results/figures/histograms/diachronic/512x512:
 	mkdir -p logs
 	rm -f logs/*.log
 	mkdir -p results/figures/histograms/diachronic/512x512
-	python scripts/colors_histogram_over_time.py --num_bins=10 -i  data/color_data/ffhq_test_512/ -o results/figures/histograms/diachronic/512x512
+	python scripts/colors_histogram_over_time.py --num_bins=20 -i  data/color_data/ffhq_test_512/ -o results/figures/histograms/diachronic/512x512
 
 
 results/figures:  results/figures/training_color_histogram_logscale.pdf results/figures/training_color_scatter.png scripts/color_histogram.py results/figures/ffhq_luminance_hdr.pdf results/figures/fairface_luminance_hdr.pdf results/figures/atypical_all_50face_dist.pdf results/figures/red_skin_grid.pdf results/figures/ffhq_color_histogram_logscale.pdf results/figures/fairface_color_histogram_logscale.pdf

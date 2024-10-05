@@ -1,0 +1,26 @@
+
+
+def get_average_color():
+    filename = "correct_LAB_format_images_data.csv"
+    try:
+        with open("bottle.py") as f:
+            print(f"Found {filename} in current directory")
+    except FileNotFoundError:
+        print(f'{filename} is not present')
+    df = pd.read_csv(filename)
+    image_ids = df["image_id"]
+    r = []
+    g = []
+    b = []
+    for id in image_ids:
+        file = glob.glob("ffhq_images_1024x1024/*/"+id)[0]
+        image = torchvision.io.read_image(file)
+        image  = image.float()
+        red_mean, green_mean, blue_mean = torch.mean(image,dim=[1,2]).numpy()
+        r.append(red_mean)
+        g.append(green_mean)
+        b.append(blue_mean)
+    df["red_mean"] = r
+    df["green_mean"] = g
+    df["blue_mean"] = b
+    df.to_csv("correct_LAB_format_images_data.csv")

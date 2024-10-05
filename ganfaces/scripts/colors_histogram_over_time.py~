@@ -1,0 +1,21 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+from colormap import rgb2hex
+from sklearn.cluster import KMeans
+import seaborn as sns
+import os
+from pathlib import Path
+import argparse
+import glob
+
+
+def plot_over_time(in_csv_dir : str,
+                   out_img_dir : str,
+                   start_iteration=0,
+                   end_iteration=25000,
+                   step=20):
+     files = glob.glob("*.csv", root_dir=in_csv_dir, recursive=False)
+     files = [f for f in files if int(Path(f).stem.split('-')[-1)) <= end_iteration]
+     files = [f for f in files if int(Path(f).stem.split('-')[-1)) >= start_iteration]
+     files = [f for f in files if int(Path(f).stem.split('-')[-1)) % step == 0]
+     print(files)

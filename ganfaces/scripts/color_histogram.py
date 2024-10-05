@@ -23,12 +23,42 @@ def append_hex_colors(df):
         hex_list.append(hex_val)
     df['color_mean'] = hex_list
 
-def plot_scatter(df, filename_prefix, out_dir=OUT_DIR, save_file=True) -> tuple:
+
+def plot_scatter(df, filename_prefix, out_dir=OUT_DIR, save_file=True, axis=None) -> tuple:
+    plot = None
+    if axis is not None:
+        plot = axis.scatter(df.luminance, df.scores_rgb, c=df.color_mean, alpha=0.6, marker='s')
+        plt.axis="off"
+        plot.axis="off"       
+        #plt.setp(axis, xlabel="Luminance", ylabel=None) #this removes axes successfully
+        axis.set_xticks([])
+        axis.set_yticks([])
+        #plt.xlabel("Luminance", fontsize=12)  
+        #plt.ylabel("Score", fontsize=12)
+
+    else:
+        plt.scatter(df.luminance, df.scores_rgb, c=df.color_mean, alpha=0.6, marker='s', axis=axis)
+        plt.xlabel("Luminance", fontsize=12)  
+        plt.ylabel("Score", fontsize=12)
+
+        
     plot = plt.figure(figsize=(7,7))
     plt.style.use('ggplot')
-    plt.scatter(df.luminance, df.scores_rgb, c=df.color_mean, alpha=0.6, marker='s')
-    plt.xlabel("Luminance", fontsize=12)  
-    plt.ylabel("Score", fontsize=12)
+
+    
+   
+    ##Delete following if code breaks
+    fig, ax = plt.subplots(sharex=True, sharey=True)
+    #plt.gca().set_xticklabels([])
+    #plt.gca().set_yticklabels([])
+
+    ax.set(xticklabels=[])  # remove the tick labels
+    ax.set(yticklabels=[])  # remove the tick labels
+    plt.xticks(visible=False)
+    plt.yticks(visible=False)
+    ax.set_axis_off()
+
+    #####
 
     #plt.savefig(OUT_DIR + 'training_color_scatter.svg') #takes too long/too big
     if save_file == True:
@@ -91,9 +121,13 @@ def find_average_color_by_bin(df, num_bins) -> list:
     logging.info("df head after binning:\n" + df.to_string(max_rows=10))
     for bin_num in labels:
         current_bin = df.loc[df['score_bin'] == bin_num]
-        bin_red = round(current_bin['red_mean'].mean())
-        bin_green = round(current_bin['green_mean'].mean())
-        bin_blue = round(current_bin['blue_mean'].mean())
+        if current_bin.empty:
+            #bar of 0 height; so, color doesn't matter
+            bin_red = bin_green = bin_blue = 0
+        else:
+            bin_red = round(current_bin['red_mean'].mean())
+            bin_green = round(current_bin['green_mean'].mean())
+            bin_blue = round(current_bin['blue_mean'].mean())
 
         # bin_colors['bin_red'] = bin_red
         # bin_colors['bin_green'] = bin_green
@@ -119,7 +153,11 @@ def plot_histogram_bin_by_color(df, num_bins=6):
     cluster_colors = find_cluster_colors(df)
     
 
-def plot_histogram_bin_by_score(df, num_bins=6, out_dir=OUT_DIR, save_file=True):
+def plot_histogram_bin_by_score(df,
+                                num_bins=6,
+                                out_dir=OUT_DIR,
+                                save_file=True,
+                                axes=None):
     bin_colors  = find_average_color_by_bin(df, num_bins)
     plt.figure(figsize=(7, 7))
     plt.tick_params(labelleft=False, left=False)
@@ -131,7 +169,7 @@ def plot_histogram_bin_by_score(df, num_bins=6, out_dir=OUT_DIR, save_file=True)
         patches[i].set_color(bin_colors[i])
 
     plt.xlabel("Frequency (log)", fontsize=12)  
-    plt.ylabel("Count", fontsize=12)
+    plt.ylabel("Score", fontsize=12)
     #plt.bar(range(num_bins), [5]*num_bins, color=bin_colors)
     #plt.legend(loc="lower left")
     #plt.legend(labelcolor='black')
@@ -141,11 +179,15 @@ def plot_histogram_bin_by_score(df, num_bins=6, out_dir=OUT_DIR, save_file=True)
     return plot
     
 
+
+
 def seaborn_plot_histogram_bin_by_score(df,
                                         filename_prefix,
                                         num_bins=6,
                                         out_dir=OUT_DIR,
-                                        save_file=True):
+                                        save_file=True,
+                                        axis=None):
+    
     logging.info("CSV scores_rgb_hasnull::"+str(df['scores_rgb'].isnull().values.any()))
     logging.info("CSV red_mean_hasnull::"+str(df['red_mean'].isnull().values.any()))
     logging.info("CSV green_mean_hasnull::"+str(df['green_mean'].isnull().values.any()))
@@ -153,21 +195,46 @@ def seaborn_plot_histogram_bin_by_score(df,
     plt.style.use('ggplot')
     plt.figure(figsize=(7 , 7))
     bin_colors  = find_average_color_by_bin(df, num_bins)
-    plot = sns.histplot(df['scores_rgb'], bins=num_bins, log_scale=(False,True))
+    plot = sns.histplot(df['scores_rgb'],
+                        bins=num_bins,
+                        log_scale=(False,True),
+                        ax=axis)
+    plt.setp(axis, xlabel="Score", ylabel="Frequency (log)") #this removes axes successfully
+    plot.set(xticklabels=[])  # remove the tick labels
+    plot.set(yticklabels=[])  # remove the tick labels
+
+    if axis is not None: #faceted
+        plt.setp(axis, xlabel=None, ylabel=None) #this removes axes successfully
+        plot.set(xlabel=None)
+        plot.set(ylabel=None)
+    else:
+        plt.xlabel("Score", fontsize=12) 
+        plt.ylabel("Frequency (log)", fontsize=12)
+
      # print(bin_colors)
     for i in range(len(bin_colors)):
         plot.patches[i].set_color(bin_colors[i])
     
-    plt.xticks(fontsize=10)
-    plt.tick_params(labelleft=False, left=False)
-    plt.xlabel("Score", fontsize=12) 
-    plt.ylabel("Frequency (log)", fontsize=12)
+    #plt.xticks(fontsize=10)
+    #plt.tick_params(labelleft=False, left=False)
+  
 
-
+    plot.tick_params(bottom=False)
+    
     #plt.bar(range(num_bins), [5]*num_bins, color=bin_colors)
     #plt.legend(loc="lower left")
     #plt.legend(labelcolor='black')
-    
+    #fig, ax = plt.subplots()
+    plt.tick_params(bottom=False)
+    fig, ax = plt.subplots()
+    plt.gca().set_xticklabels([])
+    plt.gca().set_yticklabels([])
+
+    ax.set(xticklabels=[])  # remove the tick labels
+    ax.set(yticklabels=[])  # remove the tick labels
+    plt.xticks(visible=False)
+    plt.yticks(visible=False)
+    ax.set_axis_off()
     if(save_file == True):
         plt.savefig(out_dir + "/" + filename_prefix + "_color_histogram_logscale.svg")
         plt.savefig(out_dir + "/" + filename_prefix + "_color_histogram_logscale.jpg")
