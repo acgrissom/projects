@@ -123,7 +123,7 @@ ${COLOR_DATA_OUT_DIR}/ffhq_test_128: get_average_colors.py
 #${COLOR_DATA_OUT_DIR}/ffhq_test_512: snapshot_subdir=00000-stylegan3-t-ffhq_processed_512x512-gpus8-batch32-gamma8.2
 #${COLOR_DATA_OUT_DIR}/ffhq_test_512: snapshot_subdir=00133-stylegan3-r-ffhq_processed_512x512-gpus8-batch32-gamma8.2
 
-${COLOR_DATA_OUT_DIR}/ffhq_test_512: snapshot_subdir=00135-stylegan3-r-ffhq_processed_512x512-gpus8-batch32-gamma8.2
+${COLOR_DATA_OUT_DIR}/ffhq_test_512: snapshot_subdir=00143-stylegan3-r-ffhq_processed_512x512-gpus8-batch32-gamma8.2
 
 ${COLOR_DATA_OUT_DIR}/ffhq_test_512: snapshots_path=${MODELS_DIR}/ffhq_stylegan3t/training-runs/${snapshot_subdir}
 ${COLOR_DATA_OUT_DIR}/ffhq_test_512: get_average_colors.py 
@@ -233,7 +233,7 @@ ffhq_train_512_stylegant:
 
 ffhq_train_512_stylegan3r:
 	mkdir -p $(MODELS_DIR)/ffhq_stylegan3t/training-runs
-	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-r --seed 4
+	python train.py --outdir=$(MODELS_DIR)/ffhq_stylegan3t/training-runs --data=$(IMAGES_ROOT_DIR)/ffhq_processed_512x512 --gpus=8 --batch=32 --gamma=8.2 --mirror=1 --snap=5 --cfg=stylegan3-r --seed 5
 
 
 ffhq_train_512_stylegan3r_resume_latest:
