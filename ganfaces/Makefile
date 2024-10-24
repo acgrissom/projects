@@ -15,7 +15,7 @@ r_packages:
 
 #in-progress placeholder
 faceted_test.png:
-	python scripts/colors_histogram_over_time.py -i  data/color_data/ffhq_test_512/ -o results/figures/histograms/diachronic/512x512 -s 1000 -f 0 -l 25000 -c True -r  135 139 140
+	python scripts/colors_histogram_over_time.py -i  data/color_data/ffhq_test_512/ -o results/figures/histograms/diachronic/512x512 -s 1000 -f 0 -l 25000 -c True -r  135 139 140 143
 
 results/figures/training_color_histogram_logscale.pdf:
 	mkdir -p results/figures
