@@ -137,6 +137,12 @@ def plot_over_time_facet(in_csv_dir : str,
           
           for c, ax in zip(col_headers, axes[0]):
                ax.set_title(c, size='large')
+          file_fullpath = out_img_dir + "/faceted_" + plot_type + "_test.png"
+          print("Outputting to  ", out_img_dir)
+          figs.savefig(file_fullpath, bbox_inches="tight")
+          file_fullpath = file_fullpath.replace(".png",".svg")
+          print("Outputting to  ", file_fullpath)
+          figs.savefig(file_fullpath)
 
      else: # simple case, one model        
           axis_counter = 0
@@ -157,8 +163,13 @@ def plot_over_time_facet(in_csv_dir : str,
                                                               axis=axis)
               #histogram.axes(ax=axes[axis_counter])
               axis_counter += 1
+          file_fullpath = out_img_dir + "/" + plot_type + "_fig.png"
+          print("Outputting to  ", file_fullpath)
+          fig.savefig(file_fullpath)
+          file_fullpath = file_fullpath.replace(".png",".svg")
+          print("Outputting to  ", file_fullpath)
+          fig.savefig(file_fullpath)
 
-     figs.savefig("faceted_test.png", bbox_inches="tight")
          
 
 
